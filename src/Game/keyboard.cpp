@@ -6,6 +6,7 @@
 #include "stdafx.h"
 
 #include "keyboard.h"
+#include "scene.h"
 
 static std::vector<bool> keyboard(128, 0);
 
@@ -27,6 +28,15 @@ void KeyUp(HWND hWnd, WPARAM wParam, LPARAM lParam)
         return;
     }
     keyboard[wParam] = false;
+    //暂停功能核心修改： 使用 ESC 切换暂停（在按键松开时切换可避免按住时反复触发）
+    if (wParam == VK_ESCAPE)
+    {
+        Scene* s = GetCurrentScene();
+        if (s)
+        {
+            s->isPaused = !s->isPaused;
+        }
+    }
 }
 
 // 获取按键是否按下

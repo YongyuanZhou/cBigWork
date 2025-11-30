@@ -81,7 +81,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 //  函数: MyRegisterClass()
 //
 //  目标: 注册窗口类。
-//
+
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;
@@ -162,12 +162,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         // 游戏初始化
         GameInit(hWnd, wParam, lParam);
         // 游戏主循环开始
-#if TIMER_USE == TIMER_WM_TIMER
-        SetTimer(hWnd, MAIN_TIMER_ID, 1000 / FPS, NULL);
-#elif TIMER_USE == TIMER_TQ_TIMER
-        InitTQTimer(hWnd);
-#elif TIMER_USE == TIMER_MM_TIMER
-        InitMMTimer(hWnd);
+#if TIMER_USE == TIMER_WM_TIMER// 使用 WM_TIMER 定时器
+		SetTimer(hWnd, MAIN_TIMER_ID, 1000 / FPS, NULL);// 设置定时器，每秒触发 FPS 次
+#elif TIMER_USE == TIMER_TQ_TIMER// 使用 TQTimer 定时器
+		InitTQTimer(hWnd);// 初始化 TQTimer 定时器
+#elif TIMER_USE == TIMER_MM_TIMER// 使用 MMTimer 定时器
+		InitMMTimer(hWnd);// 初始化 MMTimer 定时器
 #endif
     }
     break;

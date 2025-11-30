@@ -16,7 +16,7 @@ enum SceneId
 struct Scene
 {
     SceneId sceneId; // 游戏场景的编号
-
+    bool isPaused;   //修改：11.30 游戏是否处于暂停状态（true 表示暂停）
     // TODO: 如果场景需要保存更多信息，添加在这里
 };
 

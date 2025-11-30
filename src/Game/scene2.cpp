@@ -148,6 +148,36 @@ void RenderScene_GameScene(HDC hdc_memBuffer, HDC hdc_loadBmp)
     // 删除自定义字体以释放资源
     DeleteObject(hFont);
 
+    // 如果处于暂停状态，在游戏区域居中绘制“暂停游戏”提示（修正确保文本可见）
+    if (GetCurrentScene() && GetCurrentScene()->isPaused)
+    {
+        // 创建大字体
+        HFONT hPauseFont = CreateFont(
+            80, 0, 0, 0, FW_BOLD,
+            FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+            OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+            DEFAULT_PITCH | FF_SWISS, TEXT("微软雅黑"));
+        HFONT hOld = (HFONT)SelectObject(hdc_memBuffer, hPauseFont);
+
+        // 使用透明背景模式以避免背景被填充（关键）
+        int oldBkMode = SetBkMode(hdc_memBuffer, TRANSPARENT);
+
+        // 先绘制阴影（偏移），再绘制文字，形成清晰可见的轮廓效果
+        RECT rcText = { GAME_X, GAME_Y, GAME_X + GAME_WIDTH, GAME_Y + GAME_HEIGHT };
+        RECT rcShadow = rcText;
+        OffsetRect(&rcShadow, 2, 2); // 阴影偏移量，可调整
+
+        SetTextColor(hdc_memBuffer, RGB(0, 0, 0)); // 阴影黑色
+        DrawText(hdc_memBuffer, TEXT("暂停游戏"), -1, &rcShadow, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+        SetTextColor(hdc_memBuffer, RGB(255, 255, 255)); // 正文字白色
+        DrawText(hdc_memBuffer, TEXT("暂停游戏"), -1, &rcText, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+        // 恢复背景模式与字体
+        SetBkMode(hdc_memBuffer, oldBkMode);
+        SelectObject(hdc_memBuffer, hOld);
+        DeleteObject(hPauseFont);
+    }
     // TODO: 游戏场景其他需要绘制的UI组件
 }
 
