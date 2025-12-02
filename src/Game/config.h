@@ -26,6 +26,16 @@
 #define ENEMY_HEIGHT ENEMY_WIDTH
 #define BULLET_RADIUS 8
 
+/* 12.2可调的默认属性（统一管理） */
+#define PLAYER_DEFAULT_HEALTH 3           // 玩家初始生命值
+#define PLAYER_DEFAULT_SPEED 500.0        // 玩家默认移动速度（像素/秒）
+#define PLAYER_BULLET_SPEED 800.0         // 玩家子弹速度（像素/秒）
+#define PLAYER_MAX_BULLET_CD 0.1          // 玩家子弹最大冷却时间（秒）
+
+#define ENEMY_DEFAULT_HEALTH 3            // 敌机默认生命值
+#define ENEMY_DEFAULT_SPEED 200.0         // 敌机默认移动速度（像素/秒）
+#define ENEMY_DEFAULT_SCORE 1             // 击毁敌机获得分数
+
 /* 状态栏 */
 constexpr const int statusBarParts[3] = {150, 300, -1}; // 状态栏分栏，第一个分区宽度100，第二个占满剩余
 

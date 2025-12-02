@@ -28,12 +28,12 @@ void CreatePlayer()
     player->position.y = GAME_HEIGHT - PLAYER_HEIGHT - 20;
     player->width = PLAYER_WIDTH;
     player->height = PLAYER_HEIGHT;
-    // 玩家初始属性
-    player->attributes.health = 3;
-    player->attributes.score = 0;
-    player->attributes.speed = 500;
-    player->attributes.maxBulletCd = 0.1;
-    player->attributes.bulletCd = 0.0;
+    // 玩家初始属性（改为从 config.h 读取）
+    player->attributes.health = PLAYER_DEFAULT_HEALTH;// 初始生命值
+    player->attributes.score = 0;// 初始积分
+    player->attributes.speed = PLAYER_DEFAULT_SPEED;// 移动速度
+    player->attributes.maxBulletCd = PLAYER_MAX_BULLET_CD;// 最大子弹冷却时间
+    player->attributes.bulletCd = 0.0;// 初始子弹冷却时间
 	//可以补充其他属性
 }
 
@@ -96,17 +96,6 @@ void UpdatePlayer(double deltaTime)
     frameIndex = (int)(GetGameTime() * bmp_RowSize * bmp_ColSize) % (bmp_RowSize * bmp_ColSize);
     // TODO: 更多的角色逻辑
     // 发射子弹
-    //if (GetKeyDown(VK_SPACE))
-    //{
-    //    // 创建子弹，子弹从飞机顶部中央位置发射
-    //    CreateBullet(
-    //        player->position.x + player->width / 2.0,
-    //        player->position.y,
-    //        1, // 伤害
-    //        800.0 // 速度
-    //    );
-    //}
-    // 发射子弹
     if (GetKeyDown(VK_SPACE))
     {
         // 控制子弹发射间隔
@@ -117,9 +106,9 @@ void UpdatePlayer(double deltaTime)
                 player->position.x + player->width / 2.0,
                 player->position.y,
                 1, // 伤害
-                800.0 // 速度
+                PLAYER_BULLET_SPEED // 速度：使用配置常量
             );
-            // 0.3秒发射一次
+			// 0.3秒发射一次,重置子弹冷却时间
             player->attributes.bulletCd = player->attributes.maxBulletCd;
         }
         else

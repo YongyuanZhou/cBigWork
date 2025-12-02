@@ -23,15 +23,15 @@ static double deltaGenerateTime = 2;
 
 void CreateEnemy(double x, double y)
 {
-    Enemy *enemy = new Enemy();
-    enemy->position.x = x;
-    enemy->position.y = y;
-    enemy->width = ENEMY_WIDTH;
-    enemy->height = ENEMY_HEIGHT;
-    enemy->attributes.health = 3;
-    enemy->attributes.speed = 200;
-    enemy->attributes.score = 1;
-    enemies.insert(enemy);
+    Enemy* enemy = new Enemy();// 创建敌人对象
+    enemy->position.x = x;// 设置敌人位置
+    enemy->position.y = y;// 设置敌人位置
+    enemy->width = ENEMY_WIDTH;// 设置敌人宽度
+    enemy->height = ENEMY_HEIGHT;// 设置敌人高度
+    enemy->attributes.health = ENEMY_DEFAULT_HEALTH;// 设置敌人生命值
+    enemy->attributes.speed = ENEMY_DEFAULT_SPEED;// 设置敌人速度
+    enemy->attributes.score = ENEMY_DEFAULT_SCORE;// 设置敌人分数
+    enemies.insert(enemy);// 将敌人添加到敌人集合中
 }
 
 void CreateRandomEnemy()
