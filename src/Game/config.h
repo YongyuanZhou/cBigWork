@@ -50,3 +50,18 @@ constexpr const int statusBarParts[3] = {150, 300, -1}; // 状态栏分栏，第
 #define TIMER_USE TIMER_MM_TIMER
 
 
+/* 状态栏设置 */
+#define UI_FONT_HEIGHT 30                       // 右侧 UI（血量/积分/排行榜）字体高度（与原来一致）
+#define UI_FONT_NAME TEXT("微软雅黑")           // UI 字体名称
+
+#define LEADERBOARD_MAX_ITEMS 3                 // 排行榜显示条目数（显示前 N 条）
+#define LEADERBOARD_MARGIN_TOP 10               // 排行榜与血量/积分区域的垂直间距（像素）
+#define LEADERBOARD_ITEM_VSPACING 6             // 排行榜每项垂直间距（像素）
+
+#define LEADERBOARD_TEXT_COLOR RGB(255,255,255) // 排行榜正文字色（白色）
+#define LEADERBOARD_SHADOW_COLOR RGB(0,0,0)     // 排行榜阴影色（黑色）
+
+/* 分数储存文件 */
+#define LEADERBOARD_DATA_FILE "scores.txt"
+
+

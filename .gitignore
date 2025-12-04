@@ -15,3 +15,16 @@ obj/
 src/Game/x64/
 src/Game/bin/
 src/Game/obj/
+# 忽略C/C++编译产物
+*.exe
+*.pdb
+*.obj
+*.o
+*.dll
+# 忽略VS编译目录
+x64/
+Debug/
+Release/
+# 忽略临时文件
+*.tmp
+*.bak
