@@ -77,7 +77,7 @@ void UpdateEnemies(double deltaTime)
     // 难度计算：基于游戏运行时间做线性增长，也可以改为基于分数或波次
     // TODO: 每隔一定时间在随机位置创建一个敌人
     double gameTime = GetGameTime();
-	double difficulty = 1.0 + (gameTime / 60.0) * DIFFICULTY_SCALE_PER_MIN;// 难度随时间线性增加12.2测试：10.0是一个合适的调节参数 
+	double difficulty = 1.0 + (gameTime / 30.0) * DIFFICULTY_SCALE_PER_MIN;// 难度随时间线性增加12.2测试：30.0是一个合适的调节参数 
     if (difficulty < 1.0) difficulty = 1.0;
     // 根据 difficulty 调整生成间隔（interval = base / difficulty），并限制最小值
     deltaGenerateTime = BASE_GENERATE_TIME / difficulty;

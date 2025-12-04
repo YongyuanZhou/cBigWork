@@ -64,4 +64,16 @@ constexpr const int statusBarParts[3] = {150, 300, -1}; // 状态栏分栏，第
 /* 分数储存文件 */
 #define LEADERBOARD_DATA_FILE "scores.txt"
 
+/* 词条区域（Power-up boxes）配置 */
+#define POWERBOX_COUNT 3                        // 显示几个词条区域（当前固定为3）
+#define POWERBOX_WIDTH 180                      // 单个词条区域宽度（像素）
+#define POWERBOX_HEIGHT 54                      // 单个词条区域高度（像素）
+#define POWERBOX_SPACING 18                     // 词条区域之间的水平间距（像素）
+#define POWERBOX_MARGIN_TOP 20                  // 游戏区域顶部到词条区域的垂直间距（像素）
+#define POWERBOX_RADIUS 10                      // 圆角半径
+#define POWERBOX_BG_COLOR RGB(30,30,30)         // 背景色（深灰）
+#define POWERBOX_BORDER_COLOR RGB(200,200,200) // 边框色（浅灰）
+#define POWERBOX_TEXT_COLOR RGB(255,255,255)    // 文字颜色
+#define POWERBOX_FONT_HEIGHT (UI_FONT_HEIGHT - 6) // 词条文本字体高度
+
 

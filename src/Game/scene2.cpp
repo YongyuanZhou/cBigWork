@@ -12,12 +12,16 @@
 #include "player.h"
 #include "enemy.h"
 #include "bullet.h"
+#include "mouse.h"    // 新增：用于检测鼠标点击
 
 #include <fstream>
 #include <algorithm>
 #include <vector>
 #include <string>
 #include <cstdio>
+#include <ctime>
+#include <cstdlib>
+#include <chrono>
 
 #pragma region 碰撞检测
  // 检查角色和敌人的碰撞
@@ -25,6 +29,27 @@ static void CheckCollision_GameScene_Player_Enemies();
 // 检查敌人和子弹的碰撞
 static void CheckCollision_GameScene_Enemies_Bullets();
 #pragma endregion
+
+// --- 词条状态与标签（本文件内部管理） ---
+static bool g_powerActive = false;                         // 是否正在显示/选择词条
+static std::vector<int> g_powerOptions;                    // 当前显示的词条索引（大小等于 POWERBOX_COUNT）
+static int g_nextScoreThreshold = 50;                      // 下一次触发阈值（每次 +50）
+static const TCHAR* g_powerLabels[] = {
+    TEXT("生命增加二"),
+    TEXT("子弹射击速度增加"),
+    TEXT("玩家移速增加"),
+    TEXT("5秒无敌时间"),
+    TEXT("子弹伤害增加")
+};
+static bool g_randSeeded = false;
+static int g_powerSelected = -1;                           // 被选择的词条索引（-1 表示未选择）
+static std::chrono::steady_clock::time_point g_powerStartTime;  // 词条选择开始时间
+static const int g_powerTimeoutMs = 5000;   // 词条选择超时时间（毫秒）
+
+// 按键去抖（记录上一次按键状态）
+static bool g_keyPrev[POWERBOX_COUNT] = { false };
+// 鼠标按下去抖（记录上一帧鼠标左键状态）
+static bool g_mousePrevDown = false;
 
 // 将分数追加保存到磁盘（每行一个整数）
 static void SaveScore(int score)
@@ -60,11 +85,46 @@ static std::vector<int> LoadTopScores()
     return scores;
 }
 
+// 触发一次词条选择：随机选取 3 个不同词条，设置为活动并暂停场景
+static void TriggerPowerUp()
+{
+    if (!g_randSeeded)
+    {
+        srand((unsigned)time(nullptr));
+        g_randSeeded = true;
+    }
+
+    // 准备候选索引并打乱
+    std::vector<int> pool;
+    const int total = sizeof(g_powerLabels) / sizeof(g_powerLabels[0]);
+    for (int i = 0; i < total; ++i) pool.push_back(i);
+    std::random_shuffle(pool.begin(), pool.end()); // C++14 可用
+
+    g_powerOptions.clear();
+    for (int i = 0; i < POWERBOX_COUNT && i < (int)pool.size(); ++i)
+        g_powerOptions.push_back(pool[i]);
+
+	g_powerActive = true;// 激活词条选择
+	g_powerSelected = -1;// 重置选择状态
+	g_powerStartTime = std::chrono::steady_clock::now();// 记录开始时间
+
+    // 将场景置为暂停
+//    if (GetCurrentScene())
+//        GetCurrentScene()->isPaused = true;
+}
+
 void LoadScene_GameScene()
 {
     /* UI组件创建 */
     // 游戏场景暂时没有UI组件需要创建
     CreatePlayer();
+
+    // 确保随机数只 seed 一次
+    if (!g_randSeeded)
+    {
+        srand((unsigned)time(nullptr));
+        g_randSeeded = true;
+    }
     /* 游戏对象创建 */
     // TODO: 创建玩家对象
     // 敌人将在游戏过程中动态创建
@@ -88,7 +148,47 @@ void UnloadScene_GameScene()
 
 void ProcessUiInput_GameScene()
 {
-    // 游戏场景暂时没有UI输入需要处理
+    // 鼠标点击选择支持：当词条 UI 激活时，检测鼠标左键的按下（从未按->按下表示一次点击）
+    if (g_powerActive)
+    {
+        bool mouseDown = IsMouseLButtonDown();
+        if (mouseDown && !g_mousePrevDown)
+        {
+            // 鼠标单次按下事件：检测位置是否命中任一词条区域
+            int mx = GetMouseX();
+            int my = GetMouseY();
+
+            // 计算词条区域布局（与 Render 中一致）
+            const int boxW = POWERBOX_WIDTH;
+            const int boxH = POWERBOX_HEIGHT;
+            const int spacing = POWERBOX_SPACING;
+            const int totalW = POWERBOX_COUNT * boxW + (POWERBOX_COUNT - 1) * spacing;
+            const int startX = GAME_X + (GAME_WIDTH - totalW) / 2;
+            const int topY = GAME_Y + POWERBOX_MARGIN_TOP;
+
+            for (int i = 0; i < POWERBOX_COUNT; ++i)
+            {
+                int left = startX + i * (boxW + spacing);
+                int right = left + boxW;
+                int bottom = topY + boxH;
+                if (mx >= left && mx <= right && my >= topY && my <= bottom)
+                {
+                    // 点击了第 i 个词条
+                    if ((int)g_powerOptions.size() == POWERBOX_COUNT)
+                    {
+                        g_powerSelected = g_powerOptions[i];
+                        g_powerActive = false; // 选择后全部消失
+                        // 日志便于调试
+                        TCHAR logbuf[128];
+                        swprintf_s(logbuf, _countof(logbuf), TEXT("鼠标选择了词条：%s"), g_powerLabels[g_powerSelected]);
+                        Log(3, logbuf);
+                    }
+                    break;
+                }
+            }
+        }
+        g_mousePrevDown = mouseDown;
+    }
 }
 
 void CheckCollision_GameScene()
@@ -113,6 +213,29 @@ void UpdateScene_GameScene(double deltaTime)
     UpdateEnemies(deltaTime);
     // 更新子弹对象
     UpdateBullets(deltaTime);
+	// 检查触发词条选择的条件
+    Player* p = GetPlayer();
+    if (p && !g_powerActive)
+    {
+        if (p->attributes.score >= g_nextScoreThreshold)
+        {
+            TriggerPowerUp();
+            // 推进下一个阈值（每次 +50）
+            g_nextScoreThreshold += 50;
+        }
+    }
+    // 如果词条 UI 激活，检查超时（5s），超时则隐藏 UI（不自动应用任何词条）
+    if (g_powerActive)
+    {
+        auto now = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - g_powerStartTime).count();
+        if (elapsed >= g_powerTimeoutMs)
+        {
+            g_powerActive = false;
+            g_powerSelected = -1;
+            Log(3, TEXT("强化词条超时消失"));
+        }
+    }
     // TODO: 游戏场景中需要更新的游戏对象
 }
 
@@ -148,6 +271,84 @@ void RenderScene_GameScene(HDC hdc_memBuffer, HDC hdc_loadBmp)
     SelectObject(hdc_memBuffer, oldBrush);
     SelectObject(hdc_memBuffer, oldPen);
     DeleteObject(hPen);
+
+    // 在游戏区域内居中绘制三个词条区域（圆角矩形，显示当前词条或占位文字）
+    {
+        // 计算布局
+        const int boxW = POWERBOX_WIDTH;
+        const int boxH = POWERBOX_HEIGHT;
+        const int spacing = POWERBOX_SPACING;
+        const int totalW = POWERBOX_COUNT * boxW + (POWERBOX_COUNT - 1) * spacing;
+        const int startX = GAME_X + (GAME_WIDTH - totalW) / 2;
+        const int topY = GAME_Y + POWERBOX_MARGIN_TOP;
+
+        // 准备字体（词条文本）
+        HFONT hPowerFont = CreateFont(
+            POWERBOX_FONT_HEIGHT, 0, 0, 0, FW_SEMIBOLD,
+            FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+            OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+            DEFAULT_PITCH | FF_SWISS, UI_FONT_NAME);
+        HFONT hOldPowerFont = (HFONT)SelectObject(hdc_memBuffer, hPowerFont);
+
+        // 透明背景以便文字叠在背景上
+        int oldBkMode = SetBkMode(hdc_memBuffer, TRANSPARENT);
+        COLORREF oldTextColor = SetTextColor(hdc_memBuffer, POWERBOX_TEXT_COLOR);
+        for (int i = 0; i < POWERBOX_COUNT; ++i)
+        {
+            int left = startX + i * (boxW + spacing);
+            int right = left + boxW;
+            int bottom = topY + boxH;
+
+            // 创建并选择边框笔与填充画刷
+            HPEN hBoxPen = CreatePen(PS_SOLID, 2, POWERBOX_BORDER_COLOR);
+            HBRUSH hBoxBrush = CreateSolidBrush(POWERBOX_BG_COLOR);
+            HGDIOBJ oldBoxPen = SelectObject(hdc_memBuffer, hBoxPen);
+            HGDIOBJ oldBoxBrush = SelectObject(hdc_memBuffer, hBoxBrush);
+
+            // 圆角矩形
+            RoundRect(hdc_memBuffer, left, topY, right, bottom, POWERBOX_RADIUS, POWERBOX_RADIUS);
+
+            // 绘制文字：如果激活则显示随机词条，否则显示占位文本
+            RECT tr = { left, topY, right, bottom };
+            if (g_powerActive && (int)g_powerOptions.size() == POWERBOX_COUNT)
+            {
+                int idx = g_powerOptions[i];
+                const TCHAR* txt = g_powerLabels[idx];
+
+                // 显示按键提示（1/2/3）
+                TCHAR buf[128];
+                swprintf_s(buf, _countof(buf), TEXT("%d. %s"), i + 1, txt);
+                DrawText(hdc_memBuffer, buf, -1, &tr, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+            }
+            else
+            {
+                // 若已被选择且刚刚选择，可以短暂显示已选择项（可选）
+                if (g_powerSelected >= 0 && !g_powerActive)
+                {
+                    // 显示“已选择：XXX”
+                    TCHAR buf[128];
+                    swprintf_s(buf, _countof(buf), TEXT("已选择"));
+                    DrawText(hdc_memBuffer, buf, -1, &tr, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+                }
+                else
+                {
+                    DrawText(hdc_memBuffer, TEXT("待触发"), -1, &tr, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+                }
+            }
+
+
+            // 恢复并释放 GDI 对象
+            SelectObject(hdc_memBuffer, oldBoxBrush);
+            SelectObject(hdc_memBuffer, oldBoxPen);
+            DeleteObject(hBoxBrush);
+            DeleteObject(hBoxPen);
+        }
+        // 恢复字体与绘制模式
+        SetTextColor(hdc_memBuffer, oldTextColor);
+        SetBkMode(hdc_memBuffer, oldBkMode);
+        SelectObject(hdc_memBuffer, hOldPowerFont);
+        DeleteObject(hPowerFont);
+    }
 
     // 绘制玩家的属性信息
     HFONT hFont = CreateFont(
