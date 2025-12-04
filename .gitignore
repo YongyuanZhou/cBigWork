@@ -1,0 +1,17 @@
+# 忽略 Visual Studio 缓存和大文件目录
+.vs/
+bin/
+obj/
+*.ipch
+*.pch
+*.log
+*.tmp
+*.suo
+*.user
+*.sdf
+*.opensdf
+
+# 忽略编译生成的大文件
+src/Game/x64/
+src/Game/bin/
+src/Game/obj/
