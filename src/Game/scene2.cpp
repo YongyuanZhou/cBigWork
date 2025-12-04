@@ -30,6 +30,63 @@ static void CheckCollision_GameScene_Player_Enemies();
 static void CheckCollision_GameScene_Enemies_Bullets();
 #pragma endregion
 
+// 应用词条效果（被选择后立即调用）
+static void ApplyPowerUp(int powerIndex)
+{
+    Player* p = GetPlayer();
+    if (!p) return;
+
+    switch (powerIndex)
+    {
+    case 0: // 生命增加二
+        p->attributes.health += 2;
+        {
+            TCHAR buf[64];
+            swprintf_s(buf, _countof(buf), TEXT("已应用：生命+2，当前生命 %d"), p->attributes.health);
+            Log(1, buf);
+        }
+        break;
+    case 1: // 子弹射击速度增加（降低最大子弹冷却时间）
+    {
+        // 把冷却缩短为原来的 50%，并设定最小值上限
+        double old = p->attributes.maxBulletCd;
+        p->attributes.maxBulletCd *= 0.5;
+        if (p->attributes.maxBulletCd < 0.02) p->attributes.maxBulletCd = 0.02;
+        TCHAR buf[64];
+        swprintf_s(buf, _countof(buf), TEXT("已应用：射速提高（CD %.3f -> %.3f）"), old, p->attributes.maxBulletCd);
+        Log(1, buf);
+    }
+    break;
+    case 2: // 玩家移速增加
+    {
+        double old = p->attributes.speed;
+        p->attributes.speed *= 1.2; // 提高20%
+        TCHAR buf[64];
+        swprintf_s(buf, _countof(buf), TEXT("已应用：移速提高（%.1f -> %.1f）"), old, p->attributes.speed);
+        Log(1, buf);
+    }
+    break;
+    case 3: // 5秒无敌时间
+    {
+        p->attributes.invincible = true;
+        p->attributes.invincibleUntil = GetGameTime() + 5.0; // GetGameTime() 返回 s
+        Log(1, TEXT("已应用：5秒无敌"));
+    }
+    break;
+    case 4: // 子弹伤害增加
+    {
+        int old = p->attributes.bulletDamage;
+        p->attributes.bulletDamage += 1;
+        TCHAR buf[64];
+        swprintf_s(buf, _countof(buf), TEXT("已应用：子弹伤害增加（%d -> %d）"), old, p->attributes.bulletDamage);
+        Log(1, buf);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
 // --- 词条状态与标签（本文件内部管理） ---
 static bool g_powerActive = false;                         // 是否正在显示/选择词条
 static std::vector<int> g_powerOptions;                    // 当前显示的词条索引（大小等于 POWERBOX_COUNT）
@@ -178,6 +235,8 @@ void ProcessUiInput_GameScene()
                     {
                         g_powerSelected = g_powerOptions[i];
                         g_powerActive = false; // 选择后全部消失
+                        // 立即应用词条效果
+                        ApplyPowerUp(g_powerSelected);
                         // 日志便于调试
                         TCHAR logbuf[128];
                         swprintf_s(logbuf, _countof(logbuf), TEXT("鼠标选择了词条：%s"), g_powerLabels[g_powerSelected]);
@@ -234,6 +293,16 @@ void UpdateScene_GameScene(double deltaTime)
             g_powerActive = false;
             g_powerSelected = -1;
             Log(3, TEXT("强化词条超时消失"));
+        }
+    }
+    if (p)
+    {
+        // 如果玩家处于无敌并且时间到了则恢复
+        if (p->attributes.invincible && GetGameTime() >= p->attributes.invincibleUntil)
+        {
+            p->attributes.invincible = false;
+            p->attributes.invincibleUntil = 0.0;
+            Log(1, TEXT("无敌效果已结束"));
         }
     }
     // TODO: 游戏场景中需要更新的游戏对象

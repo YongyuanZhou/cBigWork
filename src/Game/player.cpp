@@ -34,6 +34,10 @@ void CreatePlayer()
     player->attributes.speed = PLAYER_DEFAULT_SPEED;// 移动速度
     player->attributes.maxBulletCd = PLAYER_MAX_BULLET_CD;// 最大子弹冷却时间
     player->attributes.bulletCd = 0.0;// 初始子弹冷却时间
+    // 新增默认属性
+    player->attributes.bulletDamage = 1;      // 默认子弹伤害为1
+    player->attributes.invincible = false;    // 初始非无敌
+    player->attributes.invincibleUntil = 0.0; // 无敌截止时间
 	//可以补充其他属性
 }
 
@@ -96,6 +100,12 @@ void UpdatePlayer(double deltaTime)
     frameIndex = (int)(GetGameTime() * bmp_RowSize * bmp_ColSize) % (bmp_RowSize * bmp_ColSize);
     // TODO: 更多的角色逻辑
     // 发射子弹
+    // 修改12.5保证子弹冷却在任意时刻都会被更新
+    if (player->attributes.bulletCd > 0.0)
+    {
+        player->attributes.bulletCd -= deltaTime;
+        if (player->attributes.bulletCd < 0.0) player->attributes.bulletCd = 0.0;
+    }
     if (GetKeyDown(VK_SPACE))
     {
         // 控制子弹发射间隔
@@ -105,15 +115,11 @@ void UpdatePlayer(double deltaTime)
             CreateBullet(
                 player->position.x + player->width / 2.0,
                 player->position.y,
-                1, // 伤害
-                PLAYER_BULLET_SPEED // 速度：使用配置常量
+                player->attributes.bulletDamage, // 使用玩家当前的子弹伤害
+                PLAYER_BULLET_SPEED // 修改12.5速度：使用配置常量
             );
 			// 0.3秒发射一次,重置子弹冷却时间
             player->attributes.bulletCd = player->attributes.maxBulletCd;
-        }
-        else
-        {
-            player->attributes.bulletCd -= deltaTime;
         }
     }
 }
