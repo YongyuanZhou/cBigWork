@@ -137,15 +137,24 @@ void RenderScene_GameScene(HDC hdc_memBuffer, HDC hdc_loadBmp)
     const int bottom = top + height;
     RECT rect = {left, top, right, bottom};
     // 绘制
+    // 安全检查玩家指针，避免空指针崩溃
+    Player* p = GetPlayer();
     TCHAR buffer[128];
-    swprintf_s(buffer, sizeof(buffer) / sizeof(TCHAR),
-               TEXT("第一关\n\n\n生命值: %d\n\n积分: %d"),
-               GetPlayer()->attributes.health,
-               GetPlayer()->attributes.score );
-	DrawText(hdc_memBuffer, buffer, -1, &rect, DT_CENTER);// 居中对齐
-    // 恢复原来的字体
+    if (p)
+    {
+        swprintf_s(buffer, sizeof(buffer) / sizeof(TCHAR),
+            TEXT("生命值: %d\n\n积分: %d"),
+            p->attributes.health,
+            p->attributes.score);
+    }
+    else
+    {
+        swprintf_s(buffer, sizeof(buffer) / sizeof(TCHAR),
+            TEXT("生命值: --\n\n积分: --"));
+    }
+
+    DrawText(hdc_memBuffer, buffer, -1, &rect, DT_CENTER);
     SelectObject(hdc_memBuffer, hOldFont);
-    // 删除自定义字体以释放资源
     DeleteObject(hFont);
 
     // 如果处于暂停状态，在游戏区域居中绘制“暂停游戏”提示（修正确保文本可见）
