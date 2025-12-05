@@ -145,6 +145,7 @@
     <ClInclude Include="timer.h" />
     <ClInclude Include="type.h" />
     <ClInclude Include="util.h" />
+    <ClInclude Include="audio.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bullet.cpp" />
@@ -167,6 +168,7 @@
     </ClCompile>
     <ClCompile Include="timer.cpp" />
     <ClCompile Include="util.cpp" />
+    <ClCompile Include="audio.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Game.rc" />

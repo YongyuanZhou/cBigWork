@@ -108,6 +108,9 @@
     <ClInclude Include="type.h">
       <Filter>头文件\通用</Filter>
     </ClInclude>
+    <ClInclude Include="audio.h">
+      <Filter>头文件\资源</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp">
@@ -154,6 +157,9 @@
     </ClCompile>
     <ClCompile Include="scene.cpp">
       <Filter>源文件\场景</Filter>
+    </ClCompile>
+    <ClCompile Include="audio.cpp">
+      <Filter>源文件\资源</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

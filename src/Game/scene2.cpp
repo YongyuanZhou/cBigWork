@@ -43,34 +43,34 @@ static void ApplyPowerUp(int powerIndex)
         {
             TCHAR buf[64];
             swprintf_s(buf, _countof(buf), TEXT("已应用：生命+2，当前生命 %d"), p->attributes.health);
-            Log(1, buf);
+            Log(3, buf);
         }
         break;
     case 1: // 子弹射击速度增加（降低最大子弹冷却时间）
     {
-        // 把冷却缩短为原来的 50%，并设定最小值上限
+        // 把冷却缩短为原来的 75%，并设定最小值上限
         double old = p->attributes.maxBulletCd;
-        p->attributes.maxBulletCd *= 0.5;
+        p->attributes.maxBulletCd *= 0.75;
         if (p->attributes.maxBulletCd < 0.02) p->attributes.maxBulletCd = 0.02;
         TCHAR buf[64];
         swprintf_s(buf, _countof(buf), TEXT("已应用：射速提高（CD %.3f -> %.3f）"), old, p->attributes.maxBulletCd);
-        Log(1, buf);
+        Log(3, buf);
     }
     break;
     case 2: // 玩家移速增加
     {
         double old = p->attributes.speed;
-        p->attributes.speed *= 1.2; // 提高20%
+        p->attributes.speed *= 1.25; // 提高25%
         TCHAR buf[64];
         swprintf_s(buf, _countof(buf), TEXT("已应用：移速提高（%.1f -> %.1f）"), old, p->attributes.speed);
-        Log(1, buf);
+        Log(3, buf);
     }
     break;
     case 3: // 5秒无敌时间
     {
         p->attributes.invincible = true;
         p->attributes.invincibleUntil = GetGameTime() + 5.0; // GetGameTime() 返回 s
-        Log(1, TEXT("已应用：5秒无敌"));
+        Log(3, TEXT("已应用：5秒无敌"));
     }
     break;
     case 4: // 子弹伤害增加
@@ -79,7 +79,7 @@ static void ApplyPowerUp(int powerIndex)
         p->attributes.bulletDamage += 1;
         TCHAR buf[64];
         swprintf_s(buf, _countof(buf), TEXT("已应用：子弹伤害增加（%d -> %d）"), old, p->attributes.bulletDamage);
-        Log(1, buf);
+        Log(3, buf);
     }
     break;
     default:
@@ -100,8 +100,8 @@ static const TCHAR* g_powerLabels[] = {
 };
 static bool g_randSeeded = false;
 static int g_powerSelected = -1;                           // 被选择的词条索引（-1 表示未选择）
-static std::chrono::steady_clock::time_point g_powerStartTime;  // 词条选择开始时间
-static const int g_powerTimeoutMs = 5000;   // 词条选择超时时间（毫秒）
+static double g_powerStartTime = 0.0;                      // 词条选择开始时间
+static const double g_powerTimeoutSec = 5.0;               // 词条选择超时时间（秒）
 
 // 按键去抖（记录上一次按键状态）
 static bool g_keyPrev[POWERBOX_COUNT] = { false };
@@ -114,7 +114,7 @@ static void SaveScore(int score)
     std::ofstream ofs(LEADERBOARD_DATA_FILE, std::ios::app);
     if (!ofs.is_open())
     {
-        Log(2, TEXT("无法打开排行榜文件，无法保存分数"));
+        Log(3, TEXT("无法打开排行榜文件，无法保存分数"));
         return;
     }
     ofs << score << '\n';
@@ -163,7 +163,8 @@ static void TriggerPowerUp()
 
 	g_powerActive = true;// 激活词条选择
 	g_powerSelected = -1;// 重置选择状态
-	g_powerStartTime = std::chrono::steady_clock::now();// 记录开始时间
+    // 使用游戏时间（秒）记录开始时间，便于后续和 gameTime 一致判断
+    g_powerStartTime = GetGameTime();
 
     // 将场景置为暂停
 //    if (GetCurrentScene())
@@ -286,13 +287,13 @@ void UpdateScene_GameScene(double deltaTime)
     // 如果词条 UI 激活，检查超时（5s），超时则隐藏 UI（不自动应用任何词条）
     if (g_powerActive)
     {
-        auto now = std::chrono::steady_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - g_powerStartTime).count();
-        if (elapsed >= g_powerTimeoutMs)
+        // 使用游戏主循环时间 GetGameTime() 判断，避免与系统时钟/steady_clock 混用
+        double now = GetGameTime();
+        if (now - g_powerStartTime >= g_powerTimeoutSec)
         {
             g_powerActive = false;
             g_powerSelected = -1;
-            Log(3, TEXT("强化词条超时消失"));
+            Log(3, TEXT("词条 UI 超时消失"));
         }
     }
     if (p)
@@ -302,7 +303,7 @@ void UpdateScene_GameScene(double deltaTime)
         {
             p->attributes.invincible = false;
             p->attributes.invincibleUntil = 0.0;
-            Log(1, TEXT("无敌效果已结束"));
+            Log(3, TEXT("无敌效果已结束"));
         }
     }
     // TODO: 游戏场景中需要更新的游戏对象

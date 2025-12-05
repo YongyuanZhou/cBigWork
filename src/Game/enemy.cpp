@@ -20,7 +20,7 @@ static const int bmp_CellHeight = 200;
 // 难度与生成控制参数（可调）
 static const double BASE_GENERATE_TIME = 2.0;     // 初始生成间隔（秒）
 static const double MIN_GENERATE_TIME = 0.3;      // 最小生成间隔（秒）
-static const double DIFFICULTY_SCALE_PER_MIN = 0.25; // 每分钟难度增加量（线性）
+static const double DIFFICULTY_SCALE_PER_MIN = 0.25; // 每30s难度增加量（线性）
 // 刷新时间
 static double lastGenerateTime = 0;
 static double deltaGenerateTime = 2;
@@ -91,7 +91,7 @@ void UpdateEnemies(double deltaTime)
         CreateRandomEnemy(difficulty);
         lastGenerateTime = gameTime;
     }// 每隔 deltaGenerateTime 秒生成一个敌人
-    // 每秒输出一次 gameTime 到状态栏（Log 的第 0 区）
+    // 每秒输出一次 gameTime 到状态栏（Log 的第 2 区）
     // 使用 char* 版本的 Log 以保证浮点格式能正确被格式化
     if (gameTime - lastLogTime >= 1.0)
     {

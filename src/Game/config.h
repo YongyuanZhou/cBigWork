@@ -37,7 +37,7 @@
 #define ENEMY_DEFAULT_SCORE 1             // 击毁敌机获得分数
 
 /* 状态栏 */
-constexpr const int statusBarParts[3] = {150, 300, -1}; // 状态栏分栏，第一个分区宽度100，第二个占满剩余
+constexpr const int statusBarParts[4] = {150, 300, 650,-1}; // 状态栏分栏，第一个分区宽度100，第二个占满剩余
 
 /* 游戏内参数 */
 #define FPS 100 // 游戏运行帧率
