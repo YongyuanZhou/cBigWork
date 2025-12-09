@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\框架">
+      <UniqueIdentifier>{2860373c-c536-4237-ae8c-5887a8b4e26c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\框架">
+      <UniqueIdentifier>{b92337af-92fb-4b3f-b336-69ee4ce94062}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\资源">
+      <UniqueIdentifier>{089b097e-0734-43e7-b659-d4245ed720ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\资源">
+      <UniqueIdentifier>{28862b99-0266-4ea0-a288-e83c0dbc2a48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\输入">
+      <UniqueIdentifier>{fc1d1c01-3e53-4226-9ebb-b06607f874b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\输入">
+      <UniqueIdentifier>{9cdac379-95d2-4290-9df5-e0c515fe25d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\对象">
+      <UniqueIdentifier>{a75d1025-1bcc-40d0-b05e-262dbef4ec60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\工具">
+      <UniqueIdentifier>{8f1174aa-80ef-47d8-b433-147f7778347c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\工具">
+      <UniqueIdentifier>{27b77889-6471-40f8-89f3-9c0c10a618da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\对象">
+      <UniqueIdentifier>{94590b44-3909-45fa-88e0-0b3604680d6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\场景">
+      <UniqueIdentifier>{e90b416f-a728-4dde-be3a-c748bdc8cc44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\场景">
+      <UniqueIdentifier>{446ea15d-2a0c-40b9-84ff-d2a7b4f3b934}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\通用">
+      <UniqueIdentifier>{4e432841-b12d-4a5d-86bb-444003d9a06e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="util.h">
+      <Filter>头文件\工具</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>头文件\资源</Filter>
+    </ClInclude>
+    <ClInclude Include="keyboard.h">
+      <Filter>头文件\输入</Filter>
+    </ClInclude>
+    <ClInclude Include="mouse.h">
+      <Filter>头文件\输入</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>头文件\通用</Filter>
+    </ClInclude>
+    <ClInclude Include="core.h">
+      <Filter>头文件\框架</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件\框架</Filter>
+    </ClInclude>
+    <ClInclude Include="timer.h">
+      <Filter>头文件\框架</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件\框架</Filter>
+    </ClInclude>
+    <ClInclude Include="enemy.h">
+      <Filter>头文件\对象</Filter>
+    </ClInclude>
+    <ClInclude Include="player.h">
+      <Filter>头文件\对象</Filter>
+    </ClInclude>
+    <ClInclude Include="info.h">
+      <Filter>头文件\框架</Filter>
+    </ClInclude>
+    <ClInclude Include="bullet.h">
+      <Filter>头文件\对象</Filter>
+    </ClInclude>
+    <ClInclude Include="button.h">
+      <Filter>头文件\对象</Filter>
+    </ClInclude>
+    <ClInclude Include="scene1.h">
+      <Filter>头文件\场景</Filter>
+    </ClInclude>
+    <ClInclude Include="scene2.h">
+      <Filter>头文件\场景</Filter>
+    </ClInclude>
+    <ClInclude Include="scene.h">
+      <Filter>头文件\场景</Filter>
+    </ClInclude>
+    <ClInclude Include="type.h">
+      <Filter>头文件\通用</Filter>
+    </ClInclude>
+    <ClInclude Include="audio.h">
+      <Filter>头文件\资源</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="core.cpp">
+      <Filter>源文件\框架</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件\框架</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件\框架</Filter>
+    </ClCompile>
+    <ClCompile Include="timer.cpp">
+      <Filter>源文件\框架</Filter>
+    </ClCompile>
+    <ClCompile Include="enemy.cpp">
+      <Filter>源文件\对象</Filter>
+    </ClCompile>
+    <ClCompile Include="player.cpp">
+      <Filter>源文件\对象</Filter>
+    </ClCompile>
+    <ClCompile Include="keyboard.cpp">
+      <Filter>源文件\输入</Filter>
+    </ClCompile>
+    <ClCompile Include="mouse.cpp">
+      <Filter>源文件\输入</Filter>
+    </ClCompile>
+    <ClCompile Include="resource.cpp">
+      <Filter>源文件\资源</Filter>
+    </ClCompile>
+    <ClCompile Include="util.cpp">
+      <Filter>源文件\工具</Filter>
+    </ClCompile>
+    <ClCompile Include="bullet.cpp">
+      <Filter>源文件\对象</Filter>
+    </ClCompile>
+    <ClCompile Include="button.cpp">
+      <Filter>源文件\对象</Filter>
+    </ClCompile>
+    <ClCompile Include="scene1.cpp">
+      <Filter>源文件\场景</Filter>
+    </ClCompile>
+    <ClCompile Include="scene2.cpp">
+      <Filter>源文件\场景</Filter>
+    </ClCompile>
+    <ClCompile Include="scene.cpp">
+      <Filter>源文件\场景</Filter>
+    </ClCompile>
+    <ClCompile Include="audio.cpp">
+      <Filter>源文件\资源</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Game.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Game.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="bitmap1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Start.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
