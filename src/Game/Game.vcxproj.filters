@@ -111,9 +111,12 @@
     <ClInclude Include="audio.h">
       <Filter>头文件\资源</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="ui_text.h">
       <Filter>头文件\工具</Filter>
     </ClInclude>
+=======
+>>>>>>> d73acde259af1632047a31a00aef96ec645eb38d
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp">
@@ -164,9 +167,12 @@
     <ClCompile Include="audio.cpp">
       <Filter>源文件\资源</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="ui_text.cpp">
       <Filter>源文件\工具</Filter>
     </ClCompile>
+=======
+>>>>>>> d73acde259af1632047a31a00aef96ec645eb38d
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Game.rc">

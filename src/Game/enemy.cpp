@@ -101,7 +101,7 @@ void UpdateEnemies(double deltaTime)
     {
         // 为避免混淆，使用 elapsed 来输出
         if (now - lastLogTime >= 1.0)
-        {
+    {
             Log(2, "游戏时间gameTime: %.3fs", elapsed);
             lastLogTime = now;
         }
