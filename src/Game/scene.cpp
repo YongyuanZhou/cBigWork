@@ -46,9 +46,7 @@ void SceneLoop()
 	}
 	else
 	{
-		// 暂停时：不执行碰撞与更新
-		// 如果希望在暂停时仍处理 UI（比如暂停菜单按钮），可以在这里调用 ProcessUiInput
-		// ROUTE_SCENE_FUNCTION(ProcessUiInput);
+		ROUTE_SCENE_FUNCTION(ProcessUiInput);
 	}
 }
 

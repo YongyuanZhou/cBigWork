@@ -15,6 +15,7 @@
 #include "mouse.h"    // 新增：用于检测鼠标点击
 #include "audio.h"
 #include "ui_text.h" // 新增：文字绘制工具
+#include "config.h"
 
 #include <fstream>
 #include <algorithm>
@@ -40,7 +41,6 @@ static void ApplyPowerUp(int powerIndex)
 {
     Player* p = GetPlayer();
     if (!p) return;
-
     switch (powerIndex)
     {
     case 0: // 生命增加二
@@ -92,24 +92,9 @@ static void ApplyPowerUp(int powerIndex)
     }
 }
 
-// --- 词条状态与标签（本文件内部管理） ---
-static bool g_powerActive = false;                         // 是否正在显示/选择词条
-static std::vector<int> g_powerOptions;                    // 当前显示的词条索引（大小等于 POWERBOX_COUNT）
-static int g_nextScoreThreshold = 50;                      // 下一次触发阈值（每次 +50）
-static const TCHAR* g_powerLabels[] = {
-    TEXT("生命增加二"),
-    TEXT("子弹射击速度增加"),
-    TEXT("玩家移速增加"),
-    TEXT("5秒无敌时间"),
-    TEXT("子弹伤害增加")
-};
-static bool g_randSeeded = false;
-static int g_powerSelected = -1;                           // 被选择的词条索引（-1 表示未选择）
-static double g_powerStartTime = 0.0;                      // 词条选择开始时间
-static const double g_powerTimeoutSec = 5.0;               // 词条选择超时时间（秒）
-
 // 按键去抖（记录上一次按键状态）
 static bool g_keyPrev[POWERBOX_COUNT] = { false };
+
 // 鼠标按下去抖（记录上一帧鼠标左键状态）
 static bool g_mousePrevDown = false;
 
@@ -125,6 +110,7 @@ static void SaveScore(int score)
     ofs << score << '\n';
     ofs.close();
 }
+
 // 从磁盘加载分数并返回按降序排列的前若干分数
 static std::vector<int> LoadTopScores()
 {
@@ -150,17 +136,12 @@ static std::vector<int> LoadTopScores()
 // 触发一次词条选择：随机选取 3 个不同词条，设置为活动并暂停场景
 static void TriggerPowerUp()
 {
-    if (!g_randSeeded)
-    {
-        srand((unsigned)time(nullptr));
-        g_randSeeded = true;
-    }
-
     // 准备候选索引并打乱
     std::vector<int> pool;
     const int total = sizeof(g_powerLabels) / sizeof(g_powerLabels[0]);
     for (int i = 0; i < total; ++i) pool.push_back(i);
-    std::random_shuffle(pool.begin(), pool.end()); // C++14 可用
+    // 使用 util.cpp 中的 RNG 辅助函数打乱
+    ShuffleIntVector(pool);
 
     g_powerOptions.clear();
     for (int i = 0; i < POWERBOX_COUNT && i < (int)pool.size(); ++i)
@@ -170,12 +151,19 @@ static void TriggerPowerUp()
 	g_powerSelected = -1;// 重置选择状态
     // 使用游戏时间（秒）记录开始时间，便于后续和 gameTime 一致判断
     g_powerStartTime = GetGameTime();
+ 
+    // 暂停当前场景更新（安全判断指针）
+    Scene* cur = GetCurrentScene();
+    if (cur)
+    {
+        cur->isPaused = true;
+    }
+    // 重置鼠标去抖，保证玩家点击能被识别为新一次点击
+    g_mousePrevDown = false;
 
-    // 将场景置为暂停
-//    if (GetCurrentScene())
-//        GetCurrentScene()->isPaused = true;
 }
 
+// 加载游戏场景
 void LoadScene_GameScene()
 {
     /* 重置场景内部静态状态，保证新局干净 */
@@ -183,13 +171,6 @@ void LoadScene_GameScene()
     /* UI组件创建 */
     // 游戏场景暂时没有UI组件需要创建
     CreatePlayer();
-
-    // 确保随机数只 seed 一次
-    if (!g_randSeeded)
-    {
-        srand((unsigned)time(nullptr));
-        g_randSeeded = true;
-    }
     /* 游戏对象创建 */
     // TODO: 创建玩家对象
     // 敌人将在游戏过程中动态创建
@@ -197,6 +178,7 @@ void LoadScene_GameScene()
     // TODO: 游戏场景中需要创建的游戏对象
 }
 
+// 卸载游戏场景
 void UnloadScene_GameScene()
 {
     /* UI组件销毁 */
@@ -213,6 +195,7 @@ void UnloadScene_GameScene()
     ResetGameSceneStatics();
 }
 
+// 处理游戏场景中的用户输入
 void ProcessUiInput_GameScene()
 {
     // 鼠标点击选择支持：当词条 UI 激活时，检测鼠标左键的按下（从未按->按下表示一次点击）
@@ -247,6 +230,9 @@ void ProcessUiInput_GameScene()
                         g_powerActive = false; // 选择后全部消失
                         // 立即应用词条效果
                         ApplyPowerUp(g_powerSelected);
+                        // 恢复场景更新（只在玩家实际选择了词条时解除暂停）
+                        Scene* cur = GetCurrentScene();
+                        if (cur)cur->isPaused = false;
                         // 日志便于调试
                         TCHAR logbuf[128];
                         swprintf_s(logbuf, _countof(logbuf), TEXT("鼠标选择了词条：%s"), g_powerLabels[g_powerSelected]);
@@ -260,6 +246,7 @@ void ProcessUiInput_GameScene()
     }
 }
 
+// 检查游戏场景中的碰撞
 void CheckCollision_GameScene()
 {
     // 玩家和敌人的碰撞
@@ -270,6 +257,7 @@ void CheckCollision_GameScene()
     // TODO: 更多的碰撞逻辑
 }
 
+// 更新游戏场景
 void UpdateScene_GameScene(double deltaTime)
 {
     /* UI组件更新 */
@@ -318,6 +306,7 @@ void UpdateScene_GameScene(double deltaTime)
     // TODO: 游戏场景中需要更新的游戏对象
 }
 
+// 在内存缓冲区上绘制游戏场景
 void RenderScene_GameScene(HDC hdc_memBuffer, HDC hdc_loadBmp)
 {
     /*
@@ -629,6 +618,7 @@ void CheckCollision_GameScene_Enemies_Bullets()
         }
     }
 }
+
 static void ResetGameSceneStatics()
 {
     // 清理并重置敌机系统（包括清空敌机、重置生成计时器与间隔）

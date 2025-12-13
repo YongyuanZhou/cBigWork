@@ -92,3 +92,10 @@ bool IsRectRectCollision(Rect r1, Rect r2)
              r2.top > r1.bottom ||
              r2.bottom < r1.top);
 }
+
+// 新增：打乱 int 向量实现
+void ShuffleIntVector(std::vector<int>& v)
+{
+    if (v.empty()) return;
+    std::shuffle(v.begin(), v.end(), rng);
+}

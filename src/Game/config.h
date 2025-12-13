@@ -76,4 +76,33 @@ constexpr const int statusBarParts[4] = {150, 300, 650,-1}; // 状态栏分栏�
 #define POWERBOX_TEXT_COLOR RGB(255,255,255)    // 文字颜色
 #define POWERBOX_FONT_HEIGHT (UI_FONT_HEIGHT - 6) // 词条文本字体高度
 
+/* 词条效果枚举 */
+enum PowerUpType
+{
+	POWERUP_HEALTH_UP = 0,    // 生命增加二
+	POWERUP_BULLET_SPEED_UP,  // 子弹射击速度增加
+	POWERUP_PLAYER_SPEED_UP,  // 玩家移速增加
+	POWERUP_INVINCIBILITY,    // 5秒无敌时间
+	POWERUP_BULLET_DAMAGE_UP   // 子弹伤害增加
+};
+
+//  词条状态与标签（本文件内部管理） // 
+static bool g_powerActive = false;                         // 是否正在显示/选择词条
+static std::vector<int> g_powerOptions;                    // 当前显示的词条索引
+static int g_nextScoreThreshold = 4;                      // 下一次触发阈值（每次 +50）
+static const TCHAR* g_powerLabels[] = {
+	TEXT("生命增加二"),
+	TEXT("子弹射击速度增加"),
+	TEXT("玩家移速增加"),
+	TEXT("5秒无敌时间"),
+	TEXT("子弹伤害增加")
+};
+static bool g_randSeeded = false;
+static int g_powerSelected = -1;                           // 被选择的词条索引（-1表示未选择）
+static double g_powerStartTime = 0.0;                      // 词条选择开始时间
+static const double g_powerTimeoutSec = 5.0;               // 词条选择
+
+
+
+
 

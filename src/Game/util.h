@@ -8,6 +8,8 @@
 /* 随机数 */
 int GetRandomInt(int min, int max);
 double GetRandomDouble(double min, double max);
+// 新增：打乱 int 向量（使用内部 rng）
+void ShuffleIntVector(std::vector<int>& v);
 
 /* 向量 */
 double Length(Vector2 in);
