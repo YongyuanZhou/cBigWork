@@ -114,6 +114,12 @@
     <ClInclude Include="ui_text.h">
       <Filter>头文件\工具</Filter>
     </ClInclude>
+    <ClInclude Include="help_scene.h">
+      <Filter>头文件\场景</Filter>
+    </ClInclude>
+    <ClInclude Include="setting_scene.h">
+      <Filter>头文件\场景</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp">
@@ -167,6 +173,12 @@
     <ClCompile Include="ui_text.cpp">
       <Filter>源文件\工具</Filter>
     </ClCompile>
+    <ClCompile Include="help_scene.cpp">
+      <Filter>源文件\场景</Filter>
+    </ClCompile>
+    <ClCompile Include="setting_scene.cpp">
+      <Filter>源文件\场景</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Game.rc">
@@ -184,6 +196,15 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="res\Start.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bitmap2.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\plane.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\enemy.bmp">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

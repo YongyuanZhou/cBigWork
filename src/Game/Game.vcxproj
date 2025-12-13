@@ -139,6 +139,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="scene1.h" />
     <ClInclude Include="scene2.h" />
+    <ClInclude Include="setting_scene.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="button.h" />
@@ -147,12 +148,14 @@
     <ClInclude Include="util.h" />
     <ClInclude Include="audio.h" />
     <ClInclude Include="ui_text.h" />
+    <ClInclude Include="help_scene.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bullet.cpp" />
     <ClCompile Include="button.cpp" />
     <ClCompile Include="core.cpp" />
     <ClCompile Include="enemy.cpp" />
+    <ClCompile Include="help_scene.cpp" />
     <ClCompile Include="keyboard.cpp" />
     <ClCompile Include="mouse.cpp" />
     <ClCompile Include="player.cpp" />
@@ -161,6 +164,7 @@
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="scene1.cpp" />
     <ClCompile Include="scene2.cpp" />
+    <ClCompile Include="setting_scene.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -178,6 +182,9 @@
   <ItemGroup>
     <Image Include="bitmap1.bmp" />
     <Image Include="Game.ico" />
+    <Image Include="res\bitmap2.bmp" />
+    <Image Include="res\enemy.bmp" />
+    <Image Include="res\plane.bmp" />
     <Image Include="res\Start.bmp" />
     <Image Include="small.ico" />
   </ItemGroup>

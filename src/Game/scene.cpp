@@ -9,6 +9,8 @@
 #include "scene.h"
 #include "scene1.h"
 #include "scene2.h"
+#include "help_scene.h"
+#include "setting_scene.h"
 
 // 当前游戏场景
 static Scene sceneInstance = {None,false};

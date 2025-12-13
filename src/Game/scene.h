@@ -10,7 +10,9 @@ enum SceneId
 {
     None = 0,       // 没有场景
     StartScene = 1, // 开始场景
-    GameScene = 2   // 游戏场景
+    GameScene = 2,   // 游戏场景
+    Help_Scene = 3,  // 帮助场景
+	Setting_Scene = 4 // 设置场景
 };
 
 struct Scene
@@ -44,6 +46,11 @@ void ChangeScene(SceneId newSceneId);
     case GameScene:                              \
         FUNCTION_NAME##_GameScene(__VA_ARGS__);  \
         break;                                   \
+    case Help_Scene:                             \
+        FUNCTION_NAME##_Help_Scene(__VA_ARGS__); \
+        break;                                   \
+    case Setting_Scene:                          \
+        FUNCTION_NAME##_Help_Scene(__VA_ARGS__); \
     default:                                     \
         break;                                   \
     }
