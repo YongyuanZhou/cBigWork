@@ -41,20 +41,20 @@ void LoadScene_StartScene()
         RenderStartButton, OnStartButtonClick);
     EnableButton(startButtonId);
 
-    // 新增：设置与帮助按钮（放在开始按钮正下方并排）
+    // 新增：设置与帮助按钮（紧贴在开始按钮正下方并排）
     const int smallW = 140;
     const int smallH = 50;
-    const int spacing = 20;
+    const int spacing = 0; // 紧贴，无间隙(原20)
     const int smallY = y + height + spacing;
 
-    // 左侧设置按钮，靠近开始按钮左侧内边距
-    int settingsX = x + 20;
+    // 左侧设置按钮，紧贴开始按钮左侧
+    int settingsX = x; // 紧贴左边缘
     ButtonId settingsBtn = CreateButton(settingsX, smallY, smallW, smallH,
         RenderSettingsButton, OnSettingsButtonClick);
     EnableButton(settingsBtn);
 
-    // 右侧帮助按钮，靠近开始按钮右侧内边距
-    int helpX = x + width - 20 - smallW;
+    // 右侧帮助按钮，紧贴开始按钮右侧
+    int helpX = x + width - smallW; // 紧贴右边缘
     ButtonId helpBtn = CreateButton(helpX, smallY, smallW, smallH,
         RenderHelpButton, OnHelpButtonClick);
     EnableButton(helpBtn);
@@ -114,126 +114,80 @@ void RenderScene_StartScene(HDC hdc_memBuffer, HDC hdc_loadBmp)
     /* UI组件绘制 */
     // 绘制所有的按钮
     RenderButtons(hdc_memBuffer, hdc_loadBmp);
-    // 绘制提示文字（使用 TextUtil 缓存字体并绘制）
-    //HFONT hFont = TextUtil::GetCachedFont(30, FW_NORMAL, TEXT("微软雅黑"));
-    // 选择自定义字体到设备上下文
-    //HFONT hOldFont = (HFONT)SelectObject(hdc_memBuffer, hFont);
-    // 设置字体区域
-    //const int width = 800;
-    //const int height = 300;
-    //const int left = WINDOW_WIDTH / 2 - width / 2 - 10;
-    //const int top = 456;
-    //const int right = left + width;
-    //const int bottom = top + height;
-    //RECT rect = {left, top, right, bottom};
-    // 使用 DrawTextEx（透明背景，白色文字）
-    //TextUtil::DrawTextEx(hdc_memBuffer,
-        //TEXT("使用WASD或方向键控制飞机移动\n使用空格发射子弹\n\n请大家好好学习这个框架_(:зゝ∠)_"),
-        //rect, DT_CENTER, hFont, RGB(0, 0, 0), TRANSPARENT);
-    // TODO: 开始场景其他需要绘制的UI组件
 }
 
-#pragma region 按钮逻辑
 
 extern HBITMAP bmp_StartButton;
+extern HBITMAP bmp_SettingIcon;
+extern HBITMAP bmp_HelpIcon;
 
 void RenderStartButton(Button *button, HDC hdc_memBuffer, HDC hdc_loadBmp)
 {
-    // TODO: 绘制开始按钮
+    // 绘制开始按钮，确保使用图片真实尺寸作为源尺寸以避免裁剪
     SelectObject(hdc_loadBmp, bmp_StartButton);
+
+    // 获取位图真实尺寸
+    BITMAP bm = {0};
+    GetObject(bmp_StartButton, sizeof(BITMAP), &bm);
+    int srcW = bm.bmWidth > 0 ? bm.bmWidth : button->width;
+    int srcH = bm.bmHeight > 0 ? bm.bmHeight : button->height;
+
+    // 使用 TransparentBlt 做缩放绘制，目标为按钮的宽高，源为位图的真实宽高
     TransparentBlt(
-        hdc_memBuffer, (int)button->position.x, (int)button->position.y,
+        hdc_memBuffer,
+        (int)button->position.x, (int)button->position.y,
         button->width, button->height,
-        hdc_loadBmp, 0, 0, button->width, button->height,
+        hdc_loadBmp, 0, 0, srcW, srcH,
         RGB(255, 255, 255));
+}
+
+// 渲染设置按钮，使用资源位图并缩放到按钮区域
+void RenderSettingsButton(Button* button, HDC hdc_memBuffer, HDC hdc_loadBmp)
+{
+     SelectObject(hdc_loadBmp, bmp_SettingIcon);
+     BITMAP bm = {0};
+     GetObject(bmp_SettingIcon, sizeof(BITMAP), &bm);
+     int srcW = bm.bmWidth > 0 ? bm.bmWidth : button->width;
+     int srcH = bm.bmHeight > 0 ? bm.bmHeight : button->height;
+     TransparentBlt(
+         hdc_memBuffer,
+         (int)button->position.x, (int)button->position.y,
+         button->width, button->height,
+         hdc_loadBmp, 0, 0, srcW, srcH,
+     RGB(255, 255, 255));
+}
+
+// 渲染帮助按钮，使用资源位图并缩放到按钮区域
+void RenderHelpButton(Button* button, HDC hdc_memBuffer, HDC hdc_loadBmp)
+{
+     SelectObject(hdc_loadBmp, bmp_HelpIcon);
+     BITMAP bm = {0};
+     GetObject(bmp_HelpIcon, sizeof(BITMAP), &bm);
+     int srcW = bm.bmWidth > 0 ? bm.bmWidth : button->width;
+     int srcH = bm.bmHeight > 0 ? bm.bmHeight : button->height;
+     TransparentBlt(
+      hdc_memBuffer,
+      (int)button->position.x, (int)button->position.y,
+         button->width, button->height,
+         hdc_loadBmp, 0, 0, srcW, srcH,
+         RGB(255, 255, 255));
 }
 
 void OnStartButtonClick(Button *button)
 {
-    // TODO: 开始按钮点击事件处理
-    Log(1, TEXT("游戏开始！"));
+    // 切换到游戏场景
     ChangeScene(GameScene);
 }
-
-// 渲染设置按钮（简单矩形 + 文本）
-void RenderSettingsButton(Button* button, HDC hdc_memBuffer, HDC hdc_loadBmp)
-{
-    // 背景
-    HBRUSH hBrush = CreateSolidBrush(RGB(60, 60, 60));
-    HBRUSH oldBrush = (HBRUSH)SelectObject(hdc_memBuffer, hBrush);
-    HPEN hPen = CreatePen(PS_SOLID, 2, RGB(200, 200, 200));
-    HPEN oldPen = (HPEN)SelectObject(hdc_memBuffer, hPen);
-
-    Rectangle(hdc_memBuffer,
-        (int)button->position.x, (int)button->position.y,
-        (int)(button->position.x + button->width),
-        (int)(button->position.y + button->height));
-    // 文本
-    HFONT hFont = TextUtil::GetCachedFont(18, FW_NORMAL, UI_FONT_NAME);
-    HFONT hOld = (HFONT)SelectObject(hdc_memBuffer, hFont);
-    SetBkMode(hdc_memBuffer, TRANSPARENT);
-    SetTextColor(hdc_memBuffer, RGB(255, 255, 255));
-    RECT tr = {
-        (int)button->position.x,
-        (int)button->position.y,
-        (int)(button->position.x + button->width),
-        (int)(button->position.y + button->height)
-    };
-    DrawText(hdc_memBuffer, TEXT("设置"), -1, &tr, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-
-    // 清理
-    SelectObject(hdc_memBuffer, hOld);
-    SelectObject(hdc_memBuffer, oldBrush);
-    SelectObject(hdc_memBuffer, oldPen);
-    DeleteObject(hBrush);
-    DeleteObject(hPen);
-}
-// 点击设置按钮
 void OnSettingsButtonClick(Button* button)
 {
-    Log(1, TEXT("进入设置界面！"));
+    // 切换到设置场景
     ChangeScene(Setting_Scene);
 }
-void OnHelpButtonClick(Button* button) 
+void OnHelpButtonClick(Button* button)
 {
-    Log(1, TEXT("进入帮助界面！"));
+    // 切换到帮助场景
     ChangeScene(Help_Scene);
 }
-
-// 渲染帮助按钮（简单矩形 + 文本）
-void RenderHelpButton(Button* button, HDC hdc_memBuffer, HDC hdc_loadBmp)
-{
-    // 背景
-    HBRUSH hBrush = CreateSolidBrush(RGB(60, 60, 60));
-    HBRUSH oldBrush = (HBRUSH)SelectObject(hdc_memBuffer, hBrush);
-    HPEN hPen = CreatePen(PS_SOLID, 2, RGB(200, 200, 200));
-    HPEN oldPen = (HPEN)SelectObject(hdc_memBuffer, hPen);
-
-    Rectangle(hdc_memBuffer,
-        (int)button->position.x, (int)button->position.y,
-        (int)(button->position.x + button->width),
-        (int)(button->position.y + button->height));
-
-    // 文本
-    HFONT hFont = TextUtil::GetCachedFont(18, FW_NORMAL, UI_FONT_NAME);
-    HFONT hOld = (HFONT)SelectObject(hdc_memBuffer, hFont);
-    SetBkMode(hdc_memBuffer, TRANSPARENT);
-    SetTextColor(hdc_memBuffer, RGB(255, 255, 255));
-    RECT tr = {
-        (int)button->position.x,
-        (int)button->position.y,
-        (int)(button->position.x + button->width),
-        (int)(button->position.y + button->height) };
-    DrawText(hdc_memBuffer, TEXT("帮助"), -1, &tr, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-
-    // 清理
-    SelectObject(hdc_memBuffer, hOld);
-    SelectObject(hdc_memBuffer, oldBrush);
-    SelectObject(hdc_memBuffer, oldPen);
-    DeleteObject(hBrush);
-    DeleteObject(hPen);
-}
-
 #pragma endregion
 
 #pragma region 碰撞检测

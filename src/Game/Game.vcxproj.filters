@@ -207,5 +207,14 @@
     <Image Include="res\enemy.bmp">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="..\..\..\Start.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Setting.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Help.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

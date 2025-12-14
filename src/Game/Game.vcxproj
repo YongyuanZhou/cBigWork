@@ -180,11 +180,14 @@
     <ResourceCompile Include="Game.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\Start.bmp" />
     <Image Include="bitmap1.bmp" />
     <Image Include="Game.ico" />
     <Image Include="res\bitmap2.bmp" />
     <Image Include="res\enemy.bmp" />
+    <Image Include="res\Help.bmp" />
     <Image Include="res\plane.bmp" />
+    <Image Include="res\Setting.bmp" />
     <Image Include="res\Start.bmp" />
     <Image Include="small.ico" />
   </ItemGroup>

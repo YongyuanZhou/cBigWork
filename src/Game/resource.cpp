@@ -15,6 +15,8 @@ HBITMAP bmp_BlackBackground; // 生成的纯黑背景
 HBITMAP bmp_StartButton;     // 开始按钮图片
 HBITMAP bmp_Player;          // 角色图片
 HBITMAP bmp_Enemy;           // 敌人图片
+HBITMAP bmp_SettingIcon;     // 设置图标图片
+HBITMAP bmp_HelpIcon;        // 帮助图标图片
 
 void GameResourceInit(HWND hWnd, WPARAM wParam, LPARAM lParam)
 {
@@ -27,6 +29,10 @@ void GameResourceInit(HWND hWnd, WPARAM wParam, LPARAM lParam)
     // TODO: 引入其他的静态资源
     bmp_Enemy = LoadBitmap(((LPCREATESTRUCT)lParam)->hInstance,
         MAKEINTRESOURCE(IDB_BITMAP_ENEMY));
+	bmp_SettingIcon = LoadBitmap(((LPCREATESTRUCT)lParam)->hInstance,
+		MAKEINTRESOURCE(IDB_BITMAP_SETTING_ICON));
+    bmp_HelpIcon = LoadBitmap(((LPCREATESTRUCT)lParam)->hInstance,
+		MAKEINTRESOURCE(IDB_BITMAP_HELP_BUTTON));
 }
 
 #pragma endregion
