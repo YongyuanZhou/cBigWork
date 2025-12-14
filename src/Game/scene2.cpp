@@ -17,6 +17,7 @@
 #include "ui_text.h" // 新增：文字绘制工具
 #include "config.h"
 #include "power.h"
+#include "settlement.h" // 新增：用于设置结算数据
 
 #include <fstream>
 #include <algorithm>
@@ -37,6 +38,8 @@ static void ResetGameSceneStatics();
 static bool g_keyPrev[POWERBOX_COUNT] = { false };
 // 鼠标按下去抖（记录上一帧鼠标左键状态）
 static bool g_mousePrevDown = false;
+// 保存本场开始时间（用于计算局内生存时长）
+static double g_gameSceneStartTime = 0.0;
 // 将分数追加保存到磁盘（每行一个整数）
 static void SaveScore(int score)
 {
@@ -93,6 +96,8 @@ void LoadScene_GameScene()
     // 游戏场景暂时没有UI组件需要创建
     CreatePlayer();
     /* 游戏对象创建 */
+    // 记录局内开始时间
+    g_gameSceneStartTime = GetGameTime();
     // TODO: 创建玩家对象
     // 敌人将在游戏过程中动态创建
     // 子弹将在游戏过程中动态创建
@@ -166,8 +171,8 @@ void UpdateScene_GameScene(double deltaTime)
         if (p->attributes.score >= g_nextScoreThreshold)
         {
             Power_Trigger();
-            // 推进下一个阈值（每次 +50）
-            g_nextScoreThreshold += 50;
+            // 推进下一个阈值（每次 + DEFAULT_NEXT_SCORE_INCREMENT）
+            g_nextScoreThreshold += DEFAULT_NEXT_SCORE_INCREMENT;
         }
     }
     // 交由 power 模块处理超时逻辑
@@ -368,14 +373,24 @@ void CheckCollision_GameScene_Player_Enemies()
             DestroyEnemy(enemy);
             if (player->attributes.health <= 0)
             {
+                // 保存作为最后一局的数据，供结算界面显示
+                g_lastScore = player->attributes.score;
+                // 计算局内生存时间：使用局内开始时间与当前游戏时间差，排除暂停累计
+                double pausedAccum = 0.0;
+                Scene* s = GetCurrentScene();
+				if (s) pausedAccum = s->pausedTimeAccum;// 排除暂停时间累计
+                g_lastTime = GetGameTime() - g_gameSceneStartTime - pausedAccum;//
+                if (g_lastTime < 0.0) g_lastTime = 0.0;//
+                // 保存分数到文件
                 SaveScore(player->attributes.score);  // 保存分数
                 Log(1, TEXT("游戏结束！"));
-                ChangeScene(SceneId::StartScene);
+                // 切换到结算场景
+                ChangeScene(SceneId::Settlement_Scene);
             }
         }
     }
     // TODO: 实现玩家和敌人的碰撞检测
-}
+}   
 
 // 检查敌人和子弹的碰撞
 void CheckCollision_GameScene_Enemies_Bullets()
@@ -433,7 +448,6 @@ static void ResetGameSceneStatics()
 
     // 随机数种子策略：按需保留或重置（这里重置以便下一次重新 seed）
     g_randSeeded = false;
-
     // 重置按键/鼠标去抖状态
     for (int i = 0; i < POWERBOX_COUNT; ++i) g_keyPrev[i] = false;
     g_mousePrevDown = false;

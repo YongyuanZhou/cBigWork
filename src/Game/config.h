@@ -99,6 +99,10 @@ extern int g_powerSelected;                        // 被选择的词条索引�
 extern double g_powerStartTime;                    // 词条选择开始时间
 extern const double g_powerTimeoutSec;             // 词条选择超时时长（秒）
 
+// 初始阈值与阈值增量统一配置
+#define DEFAULT_NEXT_SCORE_THRESHOLD 4
+#define DEFAULT_NEXT_SCORE_INCREMENT 50
+
 
 
 

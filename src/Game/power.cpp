@@ -15,7 +15,7 @@
 // Internal state definitions (previously in config.h as static)
 bool g_powerActive = false;
 std::vector<int> g_powerOptions;
-int g_nextScoreThreshold = 4;
+int g_nextScoreThreshold = DEFAULT_NEXT_SCORE_THRESHOLD;
 const TCHAR* g_powerLabels[] = {
     TEXT("生命增加二"),
     TEXT("子弹射击速度增加"),
@@ -44,6 +44,8 @@ void Power_Reset()
     g_powerStartTime = 0.0;
     g_randSeeded = false;
     s_mousePrevDown = false;
+    // 重置触发阈值为初始值，防止新一局继续沿用上一局阈值
+    g_nextScoreThreshold = DEFAULT_NEXT_SCORE_THRESHOLD;
 }
 
 void Power_Trigger()

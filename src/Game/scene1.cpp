@@ -13,6 +13,9 @@
 #include "button.h"
 #include "ui_text.h" // 新增：文字绘制工具
 
+ // 开始场景的静态变量
+static bool g_mousePrevDown_StartScene = false;
+
 #pragma region 按钮逻辑
 static void RenderStartButton(Button *button, HDC hdc_memBuffer, HDC hdc_loadBmp);
 static void OnStartButtonClick(Button *button);
@@ -27,10 +30,6 @@ extern HBITMAP bmp_StartButton;
 extern HBITMAP bmp_SettingIcon;
 extern HBITMAP bmp_HelpIcon;
 
-#pragma endregion
-
-#pragma region 碰撞检测
-#pragma endregion
 
 // 加载开始场景
 void LoadScene_StartScene()
@@ -92,12 +91,12 @@ void UnloadScene_StartScene()
 // 处理开始场景的用户输入
 void ProcessUiInput_StartScene()
 {
-    // TODO: 处理鼠标点击按钮
-    // TODO: 处理鼠标点击按钮
-    if (IsMouseLButtonDown())
-    {
+    // 在 ProcessUiInput_StartScene 中替换当前实现为
+    bool mouseDown = IsMouseLButtonDown();
+    if (mouseDown && !g_mousePrevDown_StartScene) {
         PressButtons(GetMouseX(), GetMouseY());
     }
+    g_mousePrevDown_StartScene = mouseDown;
 }
 
 // 碰撞检测开始场景

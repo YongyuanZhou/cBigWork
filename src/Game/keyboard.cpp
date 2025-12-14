@@ -7,6 +7,7 @@
 
 #include "keyboard.h"
 #include "scene.h"
+#include "enemy.h"
 
 static std::vector<bool> keyboard(128, 0);
 
@@ -34,7 +35,30 @@ void KeyUp(HWND hWnd, WPARAM wParam, LPARAM lParam)
         Scene* s = GetCurrentScene();
         if (s)
         {
-            s->isPaused = !s->isPaused;
+            // 切换暂停状态
+            bool newPaused = !s->isPaused;
+            s->isPaused = newPaused;
+            double now = GetGameTime();
+            if (newPaused)
+            {
+                // 记录暂停开始时刻（绝对 game time）
+                s->pauseStartTime = now;
+            }
+            else
+            {
+                // 恢复：计算这次暂停持续时间并累加
+                if (s->pauseStartTime >= 0.0)
+                {
+                    double pauseDuration = now - s->pauseStartTime;
+                    if (pauseDuration > 0.0)
+                    {
+                        s->pausedTimeAccum += pauseDuration;
+                        // 调整敌人模块内部计时器，避免由于暂停导致的突增
+                        Enemy_AdjustTimersForPause(pauseDuration);
+                    }
+                }
+                s->pauseStartTime = -1.0;
+            }
         }
     }
 }

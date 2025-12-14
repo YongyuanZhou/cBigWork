@@ -141,6 +141,7 @@
     <ClInclude Include="scene1.h" />
     <ClInclude Include="scene2.h" />
     <ClInclude Include="setting_scene.h" />
+    <ClInclude Include="settlement.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="button.h" />
@@ -167,6 +168,7 @@
     <ClCompile Include="scene1.cpp" />
     <ClCompile Include="scene2.cpp" />
     <ClCompile Include="setting_scene.cpp" />
+    <ClCompile Include="settlement.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

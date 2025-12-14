@@ -12,13 +12,17 @@ enum SceneId
     StartScene = 1, // 开始场景
     GameScene = 2,   // 游戏场景
     Help_Scene = 3,  // 帮助场景
-	Setting_Scene = 4 // 设置场景
+	Setting_Scene = 4, // 设置场景
+	Settlement_Scene = 5 // 结算场景
 };
 
 struct Scene
 {
     SceneId sceneId; // 游戏场景的编号
     bool isPaused;   //修改：11.30 游戏是否处于暂停状态（true 表示暂停）
+    // 新增：暂停相关时间跟踪，用于计算不包含暂停时间的局内时间
+    double pauseStartTime;   // 暂停开始时刻（游戏时间，秒），未暂停时为 -1
+    double pausedTimeAccum;  // 累计暂停时间（秒），用于从局内计时中减除
     // TODO: 如果场景需要保存更多信息，添加在这里
 };
 
@@ -51,6 +55,9 @@ void ChangeScene(SceneId newSceneId);
         break;                                   \
     case Setting_Scene:                          \
         FUNCTION_NAME##_Help_Scene(__VA_ARGS__); \
+        break;                                   \
+    case Settlement_Scene:                       \
+        FUNCTION_NAME##_Settlement_Scene(__VA_ARGS__); \
     default:                                     \
         break;                                   \
     }

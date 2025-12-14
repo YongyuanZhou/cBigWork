@@ -6,6 +6,7 @@
 #include "stdafx.h"
 
 #include "enemy.h"
+#include "scene.h"
 
 static std::set<Enemy *> enemies;
 
@@ -80,7 +81,14 @@ void UpdateEnemies(double deltaTime)
     // TODO: 每隔一定时间在随机位置创建一个敌人
     // 使用局内 elapsed 时间计算难度，避免使用进程启动以来的全局时间
     double now = GetGameTime();
-    double elapsed = now - enemyStartTime; // 局内时间（秒）
+    // 从当前场景获取累计暂停时间，排除暂停时长
+    double pausedAccum = 0.0;
+    Scene* s = GetCurrentScene();
+    if (s)
+    {
+        pausedAccum = s->pausedTimeAccum;
+    }
+    double elapsed = now - enemyStartTime - pausedAccum; // 局内时间（秒），不包含暂停时间
     if (elapsed < 0.0) elapsed = 0.0;
 	double difficulty = 1.0 + (elapsed / 30.0) * DIFFICULTY_SCALE_PER_MIN;// 难度随时间线性增加12.2测试：30.0是一个合适的调节参数 
     if (difficulty < 1.0) difficulty = 1.0;
@@ -97,14 +105,12 @@ void UpdateEnemies(double deltaTime)
         lastGenerateTime = now;
     }// 每隔 deltaGenerateTime 秒生成一个敌人
     // 每秒输出一次 gameTime 到状态栏（Log 的第 2 区）
-    if (elapsed - lastLogTime + enemyStartTime >= 1.0) // lastLogTime 和 lastGenerateTime 都是绝对时刻，但我们保留以绝对时刻比较
+    // 使用绝对时间比较 lastLogTime，且在暂停恢复时会通过调整 lastLogTime 避免突发输出
+    if (now - lastLogTime >= 1.0)
     {
         // 为避免混淆，使用 elapsed 来输出
-        if (now - lastLogTime >= 1.0)
-    {
-            Log(2, "游戏时间gameTime: %.3fs", elapsed);
-            lastLogTime = now;
-        }
+        Log(2, "游戏时间gameTime: %.3fs", elapsed);
+        lastLogTime = now;
     }
     // TODO: 敌人的移动逻辑
     for (Enemy* enemy : GetEnemies())
@@ -143,4 +149,15 @@ void ResetEnemySystem()
 
     // 重置生成计时器与间隔、日志时间为初始值
 	enemyStartTime = GetGameTime();
+	lastGenerateTime = enemyStartTime;
+	deltaGenerateTime = BASE_GENERATE_TIME;
+	lastLogTime = enemyStartTime;
+}
+
+// 在从暂停恢复时，调整内部计时器，避免由于暂停导致的 "时间差" 突然触发多次生成或日志
+void Enemy_AdjustTimersForPause(double pauseDuration)
+{
+    if (pauseDuration <= 0.0) return;
+    lastGenerateTime += pauseDuration;
+    lastLogTime += pauseDuration;
 }

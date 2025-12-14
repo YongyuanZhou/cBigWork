@@ -29,3 +29,5 @@ void UpdateEnemies(double deltaTime);
 void RenderEnemies(HDC hdc_memBuffer, HDC hdc_loadBmp);
 // 重置敌人系统（销毁所有敌人并重置静态变量）
 void ResetEnemySystem();
+// 当游戏从暂停恢复时，调整敌人生成/日志计时器，避免因为暂停造成的追赶生成
+void Enemy_AdjustTimersForPause(double pauseDuration);

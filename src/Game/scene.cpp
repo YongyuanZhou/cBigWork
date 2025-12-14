@@ -11,9 +11,10 @@
 #include "scene2.h"
 #include "help_scene.h"
 #include "setting_scene.h"
+#include "settlement.h"
 
 // 当前游戏场景
-static Scene sceneInstance = {None,false};
+static Scene sceneInstance = {None, false, -1.0, 0.0};
 static Scene *currentScene = &sceneInstance;
 
 static SceneId _newSceneId = None;
@@ -30,6 +31,9 @@ void SceneLoop()
 		_newSceneId = None;
 		//修改：11.30 切换场景时重置暂停状态
 		currentScene->isPaused = false;
+		// 重置暂停时间追踪
+		currentScene->pauseStartTime = -1.0;
+		currentScene->pausedTimeAccum = 0.0;
 		// 加载新场景
 		ROUTE_SCENE_FUNCTION(LoadScene);
 	}

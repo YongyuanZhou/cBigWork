@@ -123,6 +123,9 @@
     <ClInclude Include="power.h">
       <Filter>头文件\对象</Filter>
     </ClInclude>
+    <ClInclude Include="settlement.h">
+      <Filter>头文件\场景</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp">
@@ -184,6 +187,9 @@
     </ClCompile>
     <ClCompile Include="power.cpp">
       <Filter>源文件\对象</Filter>
+    </ClCompile>
+    <ClCompile Include="settlement.cpp">
+      <Filter>源文件\场景</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
