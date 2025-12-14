@@ -120,6 +120,9 @@
     <ClInclude Include="setting_scene.h">
       <Filter>头文件\场景</Filter>
     </ClInclude>
+    <ClInclude Include="power.h">
+      <Filter>头文件\对象</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp">
@@ -178,6 +181,9 @@
     </ClCompile>
     <ClCompile Include="setting_scene.cpp">
       <Filter>源文件\场景</Filter>
+    </ClCompile>
+    <ClCompile Include="power.cpp">
+      <Filter>源文件\对象</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

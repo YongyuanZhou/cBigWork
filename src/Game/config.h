@@ -86,21 +86,18 @@ enum PowerUpType
 	POWERUP_BULLET_DAMAGE_UP   // 子弹伤害增加
 };
 
-//  词条状态与标签（本文件内部管理） // 
-static bool g_powerActive = false;                         // 是否正在显示/选择词条
-static std::vector<int> g_powerOptions;                    // 当前显示的词条索引
-static int g_nextScoreThreshold = 4;                      // 下一次触发阈值（每次 +50）
-static const TCHAR* g_powerLabels[] = {
-	TEXT("生命增加二"),
-	TEXT("子弹射击速度增加"),
-	TEXT("玩家移速增加"),
-	TEXT("5秒无敌时间"),
-	TEXT("子弹伤害增加")
-};
-static bool g_randSeeded = false;
-static int g_powerSelected = -1;                           // 被选择的词条索引（-1表示未选择）
-static double g_powerStartTime = 0.0;                      // 词条选择开始时间
-static const double g_powerTimeoutSec = 5.0;               // 词条选择
+// 词条状态（由 power.cpp 维护）
+#include <vector>
+#include <tchar.h>
+
+extern bool g_powerActive;                         // 是否正在显示/选择词条
+extern std::vector<int> g_powerOptions;            // 当前显示的词条索引
+extern int g_nextScoreThreshold;                   // 下一次触发阈值（每次 +50）
+extern const TCHAR* g_powerLabels[];
+extern bool g_randSeeded;
+extern int g_powerSelected;                        // 被选择的词条索引（-1表示未选择）
+extern double g_powerStartTime;                    // 词条选择开始时间
+extern const double g_powerTimeoutSec;             // 词条选择超时时长（秒）
 
 
 

@@ -135,6 +135,7 @@
     <ClInclude Include="info.h" />
     <ClInclude Include="mouse.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="power.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="scene1.h" />
@@ -159,6 +160,7 @@
     <ClCompile Include="keyboard.cpp" />
     <ClCompile Include="mouse.cpp" />
     <ClCompile Include="player.cpp" />
+    <ClCompile Include="power.cpp" />
     <ClCompile Include="resource.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="scene.cpp" />
