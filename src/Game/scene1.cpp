@@ -22,6 +22,11 @@ static void RenderSettingsButton(Button* button, HDC hdc_memBuffer, HDC hdc_load
 static void OnSettingsButtonClick(Button* button);
 static void RenderHelpButton(Button* button, HDC hdc_memBuffer, HDC hdc_loadBmp);
 static void OnHelpButtonClick(Button* button);
+// 资源位图句柄
+extern HBITMAP bmp_StartButton;
+extern HBITMAP bmp_SettingIcon;
+extern HBITMAP bmp_HelpIcon;
+
 #pragma endregion
 
 #pragma region 碰撞检测
@@ -35,32 +40,43 @@ void LoadScene_StartScene()
     const int width = 300;
     const int height = 200;
 	const int x = (WINDOW_WIDTH - width) / 2 - 10; // 微调左移10像素
-    const int y = 196;
+    const int y = 180;
     // TODO: 创建一个在这个位置的按钮
     ButtonId startButtonId = CreateButton(x, y, width, height,
         RenderStartButton, OnStartButtonClick);
     EnableButton(startButtonId);
 
-    // 新增：设置与帮助按钮（紧贴在开始按钮正下方并排）
-    const int smallW = 140;
-    const int smallH = 50;
-    const int spacing = 0; // 紧贴，无间隙(原20)
-    const int smallY = y + height + spacing;
+    // 使用帮助/设置位图的原始像素尺寸创建按钮
+    BITMAP bmHelp = { 0 };
+    BITMAP bmSet = { 0 };
+    int helpW = 140, helpH = 50;   // 回退值，防止位图未加载
+    int setW = 140, setH = 50;
 
-    // 左侧设置按钮，紧贴开始按钮左侧
-    int settingsX = x; // 紧贴左边缘
-    ButtonId settingsBtn = CreateButton(settingsX, smallY, smallW, smallH,
-        RenderSettingsButton, OnSettingsButtonClick);
-    EnableButton(settingsBtn);
-
-    // 右侧帮助按钮，紧贴开始按钮右侧
-    int helpX = x + width - smallW; // 紧贴右边缘
-    ButtonId helpBtn = CreateButton(helpX, smallY, smallW, smallH,
+    if (bmp_HelpIcon)
+    {
+        GetObject(bmp_HelpIcon, sizeof(BITMAP), &bmHelp);
+        if (bmHelp.bmWidth > 0 && bmHelp.bmHeight > 0) { helpW = bmHelp.bmWidth; helpH = bmHelp.bmHeight; }
+    }
+    if (bmp_SettingIcon)
+    {
+        GetObject(bmp_SettingIcon, sizeof(BITMAP), &bmSet);
+        if (bmSet.bmWidth > 0 && bmSet.bmHeight > 0) { setW = bmSet.bmWidth; setH = bmSet.bmHeight; }
+    }
+    // 帮助按钮：紧贴开始按钮正下方，水平居中对齐
+    int helpX = x + (width - helpW) / 2;
+    int helpY = y + height; // 紧贴，无间隙
+    ButtonId helpBtn = CreateButton(helpX, helpY, helpW, helpH,
         RenderHelpButton, OnHelpButtonClick);
     EnableButton(helpBtn);
 
+    // 设置按钮：紧贴在帮助按钮正下方，水平居中对齐
+    int setX = x + (width - setW) / 2;
+    int setY = helpY + helpH; // 紧贴，无间隙
+    ButtonId settingsBtn = CreateButton(setX, setY, setW, setH,
+        RenderSettingsButton, OnSettingsButtonClick);
+    EnableButton(settingsBtn);
+
     /* 游戏对象创建 */
-    // 开始场景暂时没有游戏对象需要创建
 }
 
 // 卸载开始场景
@@ -111,15 +127,22 @@ void RenderScene_StartScene(HDC hdc_memBuffer, HDC hdc_loadBmp)
     /* 游戏对象绘制 */
     // 开始场景暂时没有游戏对象需要绘制
 
+    /* 标题绘制：在界面上方居中显示 "飞机大战" */
+    {
+        HFONT hFont = TextUtil::GetCachedFont(90, FW_BOLD, UI_FONT_NAME);
+        const int titleW = 600;
+        const int titleH = 100;
+        const int left = WINDOW_WIDTH / 2 - titleW / 2;
+        const int top = 40; // 上方合适位置
+        RECT rect = { left-20, top, left + titleW, top + titleH };
+        TextUtil::DrawTextEx(hdc_memBuffer, TEXT("飞机大战"), rect, DT_CENTER, hFont, RGB(0, 0, 0), TRANSPARENT);
+    }
+
     /* UI组件绘制 */
     // 绘制所有的按钮
     RenderButtons(hdc_memBuffer, hdc_loadBmp);
 }
 
-
-extern HBITMAP bmp_StartButton;
-extern HBITMAP bmp_SettingIcon;
-extern HBITMAP bmp_HelpIcon;
 
 void RenderStartButton(Button *button, HDC hdc_memBuffer, HDC hdc_loadBmp)
 {
