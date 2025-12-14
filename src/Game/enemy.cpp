@@ -19,14 +19,16 @@ static const int bmp_CellWidth = 200;
 static const int bmp_CellHeight = 200;
 
 // 难度与生成控制参数（可调）
-static const double BASE_GENERATE_TIME = 2.0;     // 初始生成间隔（秒）
 static const double MIN_GENERATE_TIME = 0.3;      // 最小生成间隔（秒）
 static const double DIFFICULTY_SCALE_PER_MIN = 0.25; // 每30s难度增加量（线性）
+
+// 基准生成间隔，可被 ResetEnemySystem 从设置中覆盖
+static double BASE_GENERATE_TIME = DIFFICULTY_BASE_INTERVALS[1];
 
 // 刷新时间（以绝对时刻保存），以及局内起始时间（用于计算局内 elapsed）
 static double enemyStartTime = 0.0;
 static double lastGenerateTime = 0.0;
-static double deltaGenerateTime = BASE_GENERATE_TIME;
+static double deltaGenerateTime = BASE_GENERATE_TIME;     // 初始生成间隔（秒） (can be overridden by settings)
 // 用于节流日志输出（避免每帧打印）
 static double lastLogTime = 0.0;
 
@@ -148,10 +150,13 @@ void ResetEnemySystem()
     DestroyEnemies();
 
     // 重置生成计时器与间隔、日志时间为初始值
-	enemyStartTime = GetGameTime();
-	lastGenerateTime = enemyStartTime;
-	deltaGenerateTime = BASE_GENERATE_TIME;
-	lastLogTime = enemyStartTime;
+ 	enemyStartTime = GetGameTime();
+ 	lastGenerateTime = enemyStartTime;
+ 	// Initialize BASE_GENERATE_TIME from global difficulty mapping
+	extern int g_difficultyIndex;
+	BASE_GENERATE_TIME = DIFFICULTY_BASE_INTERVALS[g_difficultyIndex];
+ 	deltaGenerateTime = BASE_GENERATE_TIME;
+ 	lastLogTime = enemyStartTime;
 }
 
 // 在从暂停恢复时，调整内部计时器，避免由于暂停导致的 "时间差" 突然触发多次生成或日志

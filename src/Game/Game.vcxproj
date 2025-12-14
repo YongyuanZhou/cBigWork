@@ -167,6 +167,7 @@
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="scene1.cpp" />
     <ClCompile Include="scene2.cpp" />
+    <ClCompile Include="settings.cpp" />
     <ClCompile Include="setting_scene.cpp" />
     <ClCompile Include="settlement.cpp" />
     <ClCompile Include="stdafx.cpp">

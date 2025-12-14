@@ -64,6 +64,21 @@ constexpr const int statusBarParts[4] = {150, 300, 650,-1}; // 状态栏分栏�
 /* 分数储存文件 */
 #define LEADERBOARD_DATA_FILE "scores.txt"
 
+/* 设置保存文件 */
+#define SETTINGS_DATA_FILE "settings.txt"
+
+/* 设置项默认值 (definitions moved to settings.cpp) */
+extern int g_masterVolume; // 0-100
+extern int g_difficultyIndex; // 0:简单,1:中,2:难
+
+// Load/Save settings and apply volume
+void LoadSettings();
+void SaveSettings();
+void ApplyMasterVolume();
+
+/* 难度映射：索引到基准生成间隔（数值越小生成越快，难度越大） */
+static const double DIFFICULTY_BASE_INTERVALS[3] = {2.5, 2.0, 1.5};
+
 /* 词条区域（Power-up boxes）配置 */
 #define POWERBOX_COUNT 3                        // 显示几个词条区域（当前固定为3）
 #define POWERBOX_WIDTH 180                      // 单个词条区域宽度（像素）

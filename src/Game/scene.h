@@ -54,7 +54,7 @@ void ChangeScene(SceneId newSceneId);
         FUNCTION_NAME##_Help_Scene(__VA_ARGS__); \
         break;                                   \
     case Setting_Scene:                          \
-        FUNCTION_NAME##_Help_Scene(__VA_ARGS__); \
+        FUNCTION_NAME##_Setting_Scene(__VA_ARGS__); \
         break;                                   \
     case Settlement_Scene:                       \
         FUNCTION_NAME##_Settlement_Scene(__VA_ARGS__); \

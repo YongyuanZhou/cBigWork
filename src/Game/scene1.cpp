@@ -210,7 +210,4 @@ void OnHelpButtonClick(Button* button)
     // 切换到帮助场景
     ChangeScene(Help_Scene);
 }
-#pragma endregion
 
-#pragma region 碰撞检测
-#pragma endregion
