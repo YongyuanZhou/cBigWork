@@ -13,6 +13,8 @@ struct Player
     int height;
 
     Attributes attributes;
+    // 上一帧的位置，用于计算朝向/速度（供敌人行为参考）
+    Vector2 lastPosition;
 };
 
 // 创建角色

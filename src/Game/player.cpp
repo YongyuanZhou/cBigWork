@@ -39,6 +39,9 @@ void CreatePlayer()
     player->attributes.invincible = false;    // 初始非无敌
     player->attributes.invincibleUntil = 0.0; // 无敌截止时间
 	//可以补充其他属性
+
+    // 初始化上一帧位置
+    player->lastPosition = player->position;
 }
 
 void DestroyPlayer()
@@ -54,6 +57,9 @@ Player *GetPlayer()
 
 void UpdatePlayer(double deltaTime)
 {
+    // 存储上一帧位置，用于敌机预测玩家前进方向
+    if (player) player->lastPosition = player->position;
+
     // TODO: 取键盘输入，然后控制角色位置（归一化方向向量，保证所有方向移动速度一致）
     Vector2 direction = { 0, 0 };
     if (GetKeyDown(VK_W) || GetKeyDown(VK_UP))

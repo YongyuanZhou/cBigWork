@@ -8,6 +8,9 @@
 #include "enemy.h"
 #include "scene.h"
 #include "settings.h"
+#include "player.h" // needed to access player position
+#include "util.h"   // for Normalize/Length
+#include "bullet.h" // to create enemy bullets
 
 static std::set<Enemy *> enemies;
 
@@ -33,7 +36,17 @@ static double deltaGenerateTime = BASE_GENERATE_TIME;     // 初始生成间隔�
 // 用于节流日志输出（避免每帧打印）
 static double lastLogTime = 0.0;
 
-void CreateEnemy(double x, double y, double difficulty = 1.0)
+// Boss 生成计时
+static double lastBossTime = 0.0;
+static const double BOSS_INTERVAL = 30.0; // 每30秒生成一个boss
+
+// 每个敌人的目标偏移范围（像素）
+static const double TARGET_OFFSET_RADIUS = 140.0; // 可调整，越大敌人分散越开
+// 敌人射击设置
+static const double ENEMY_SHOT_COOLDOWN = 1.5; // 每架敌机射击间隔（秒）
+static const double ENEMY_BULLET_SPEED_MULT = 1.2; // 敌弹速度为敌机速度的倍数
+
+void CreateEnemy(double x, double y, double difficulty)
 {
     Enemy* enemy = new Enemy();// 创建敌人对象
     enemy->position.x = x;// 设置敌人位置
@@ -45,10 +58,38 @@ void CreateEnemy(double x, double y, double difficulty = 1.0)
     // 速度按非线性方式适度增加（避免速度飙得太快）
     enemy->attributes.speed = ENEMY_DEFAULT_SPEED * (1.0 + (difficulty - 1.0) * 0.5);
     enemy->attributes.score = static_cast<int>(std::ceil(ENEMY_DEFAULT_SCORE * difficulty));
+    enemy->isBoss = false;
+    enemy->hasBullet = false;
+    // 随机固定目标偏移，使用极坐标采样以均匀分布
+    double ang = GetRandomDouble(0.0, 2.0 * 3.14159265358979323846);
+    double r = GetRandomDouble(0.0, TARGET_OFFSET_RADIUS);
+    enemy->targetOffset.x = cos(ang) * r;
+    enemy->targetOffset.y = sin(ang) * r;
+    // 使用 attributes.bulletCd 作为射击冷却计时器（重用字段以减少结构修改）
+    enemy->attributes.bulletCd = 0.0;
     enemies.insert(enemy);// 将敌人添加到敌人集合中
 }
 
-void CreateRandomEnemy(double difficulty = 1.0)
+void CreateBoss(double x, double y)
+{
+    Enemy* boss = new Enemy();
+    boss->position.x = x;
+    boss->position.y = y;
+    boss->width = ENEMY_WIDTH * 3; // 体积三倍
+    boss->height = ENEMY_HEIGHT * 3;
+    boss->attributes.health = static_cast<int>(std::ceil(ENEMY_DEFAULT_HEALTH * 3.0)); // 生命值三倍
+    boss->attributes.speed = ENEMY_DEFAULT_SPEED; // 速度不变
+    boss->attributes.score = static_cast<int>(std::ceil(ENEMY_DEFAULT_SCORE * 3.0));
+    boss->isBoss = true;
+    boss->hasBullet = false;
+    // boss 不需要偏移，或者可设小偏移
+    boss->targetOffset.x = 0.0;
+    boss->targetOffset.y = 0.0;
+    boss->attributes.bulletCd = 0.0;
+    enemies.insert(boss);
+}
+
+void CreateRandomEnemy(double difficulty)
 {
     CreateEnemy(
         GetRandomDouble(30, GAME_WIDTH - ENEMY_WIDTH - 30),
@@ -114,13 +155,101 @@ void UpdateEnemies(double deltaTime)
         Log(2, "游戏时间gameTime: %.3fs", elapsed);
         lastLogTime = now;
     }
-    // TODO: 敌人的移动逻辑
+
+    // 每隔 BOSS_INTERVAL 秒生成一个 boss
+    if (now - lastBossTime >= BOSS_INTERVAL)
+    {
+        // 在上方中央生成 boss
+        double bx = (GAME_WIDTH - ENEMY_WIDTH * 3) / 2.0;
+        double by = - (ENEMY_HEIGHT * 3) - 50; // 从更高处生成
+        CreateBoss(bx, by);
+        lastBossTime = now;
+    }
+
+    // 敌人的移动逻辑：朝向玩家的前进方向（预测位置），boss 直线向下
+    Player* player = GetPlayer();
+    const double lookaheadDistance = 200.0; // 预测前方多少像素
     for (Enemy* enemy : GetEnemies())
     {
-        // 敌人向下移动
-        enemy->position.y += enemy->attributes.speed * deltaTime;
+        // 更新射击冷却
+        if (enemy->attributes.bulletCd > 0.0)
+        {
+            enemy->attributes.bulletCd -= deltaTime;
+            if (enemy->attributes.bulletCd < 0.0) enemy->attributes.bulletCd = 0.0;
+        }
+
+        Vector2 moveDir = {0, 1}; // 默认向下
+        if (!enemy->isBoss && player)
+        {
+            // 玩家中心（用于偏移计算）
+            Vector2 playerCenter = { player->position.x + player->width/2.0, player->position.y + player->height/2.0 };
+
+            // 计算玩家前向向量（当前位置 - 上一帧位置）
+            Vector2 playerForward = { player->position.x - player->lastPosition.x, player->position.y - player->lastPosition.y };
+            double fLen = Length(playerForward);
+            if (fLen < 1e-6)
+            {
+                // 玩家基本静止，直接朝向玩家中心 + 偏移
+                Vector2 target = { playerCenter.x + enemy->targetOffset.x, playerCenter.y + enemy->targetOffset.y };
+                Vector2 toPlayer = { target.x - (enemy->position.x + enemy->width/2.0), target.y - (enemy->position.y + enemy->height/2.0) };
+                double tLen = Length(toPlayer);
+                if (tLen > 1e-6) moveDir = Normalize(toPlayer);
+            }
+            else
+            {
+                // 预测玩家前方位置并朝向该点（再加上每个敌人的偏移）
+                Vector2 forwardN = Normalize(playerForward);
+                Vector2 predictedCenter = { playerCenter.x + forwardN.x * lookaheadDistance, playerCenter.y + forwardN.y * lookaheadDistance };
+                Vector2 target = { predictedCenter.x + enemy->targetOffset.x, predictedCenter.y + enemy->targetOffset.y };
+                Vector2 toPred = { target.x - (enemy->position.x + enemy->width/2.0), target.y - (enemy->position.y + enemy->height/2.0) };
+                double tLen = Length(toPred);
+                if (tLen > 1e-6) moveDir = Normalize(toPred);
+            }
+        }
+
+        // 敌人开火逻辑：如果还没有子弹并且冷却为0且位于可见区域，则发射一枚子弹（向下）
+        if (!enemy->hasBullet && enemy->attributes.bulletCd <= 0.0)
+        {
+            // 只在敌机进入可见区域时才开火，避免生成后立即被销毁
+            double spawnY = enemy->position.y + enemy->height + 5.0;
+            if (spawnY > - (double)BULLET_RADIUS) // 当弹出口不在屏幕上方太远时允许发射
+            {
+                Vector2 bdir = {0, 1};
+                double bspeed = enemy->attributes.speed * ENEMY_BULLET_SPEED_MULT;
+                double bx = enemy->position.x + enemy->width / 2.0;
+                double by = spawnY; // 出口在机体下方
+                CreateBullet(bx, by, 1, bspeed, bdir, true, enemy);
+                enemy->hasBullet = true;
+                enemy->attributes.bulletCd = ENEMY_SHOT_COOLDOWN;
+            }
+        }
+
+        // 禁止向上移动（不允许后退）：将 moveDir.y 截断为 >= MIN_DOWN_COMPONENT，然后重新归一化
+        {
+            const double MIN_DOWN_COMPONENT = 0.25; // 最小向下分量，保证敌机始终有向下进展
+            double mx = moveDir.x;
+            double my = moveDir.y;
+            if (my < MIN_DOWN_COMPONENT) my = MIN_DOWN_COMPONENT;
+            double mlen = sqrt(mx * mx + my * my);
+            if (mlen < 1e-6)
+            {
+                // 如果方向变为零或极小，使用向下移动
+                moveDir.x = 0.0;
+                moveDir.y = 1.0;
+            }
+            else
+            {
+                moveDir.x = mx / mlen;
+                moveDir.y = my / mlen;
+            }
+        }
+
+        // 应用速度移动
+        enemy->position.x += moveDir.x * enemy->attributes.speed * deltaTime;
+        enemy->position.y += moveDir.y * enemy->attributes.speed * deltaTime;
+
         // 超出屏幕的敌人删除
-        if (enemy->position.y > GAME_HEIGHT + 50)
+        if (enemy->position.y > GAME_HEIGHT + 50 || enemy->position.x < -100 || enemy->position.x > GAME_WIDTH + 100)
         {
             DestroyEnemy(enemy);
         }
@@ -155,6 +284,7 @@ void ResetEnemySystem()
 	BASE_GENERATE_TIME = GetDifficultyBaseInterval();
 	deltaGenerateTime = BASE_GENERATE_TIME;// 重置生成间隔
 	lastLogTime = enemyStartTime;// 重置日志时间
+	lastBossTime = enemyStartTime; // 重置 boss 计时
 }
 
 // 在从暂停恢复时，调整内部计时器，避免由于暂停导致的 "时间差" 突然触发多次生成或日志
@@ -163,4 +293,5 @@ void Enemy_AdjustTimersForPause(double pauseDuration)
     if (pauseDuration <= 0.0) return;
     lastGenerateTime += pauseDuration;
     lastLogTime += pauseDuration;
+    lastBossTime += pauseDuration;
 }

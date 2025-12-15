@@ -350,6 +350,7 @@ void CheckCollision_GameScene_Player_Enemies()
 {
     // 玩家用简单矩形表示
     Player* player = GetPlayer();
+    if (!player) return;
     Rect rect1{};
     rect1.left = player->position.x;
     rect1.right = player->position.x + player->width;
@@ -367,7 +368,7 @@ void CheckCollision_GameScene_Player_Enemies()
         if (IsRectRectCollision(rect1, rect2))
         {
             // 碰撞后扣血、加分摧毁敌人
-            if(player->attributes.invincible==0)
+            if(!player->attributes.invincible)
                 player->attributes.health--;
             player->attributes.score += enemy->attributes.score;
             DestroyEnemy(enemy);
@@ -378,7 +379,7 @@ void CheckCollision_GameScene_Player_Enemies()
                 // 计算局内生存时间：使用局内开始时间与当前游戏时间差，排除暂停累计
                 double pausedAccum = 0.0;
                 Scene* s = GetCurrentScene();
-				if (s) pausedAccum = s->pausedTimeAccum;// 排除暂停时间累计
+                if (s) pausedAccum = s->pausedTimeAccum;// 排除暂停时间累计
                 g_lastTime = GetGameTime() - g_gameSceneStartTime - pausedAccum;//
                 if (g_lastTime < 0.0) g_lastTime = 0.0;//
                 // 保存分数到文件
@@ -389,7 +390,35 @@ void CheckCollision_GameScene_Player_Enemies()
             }
         }
     }
-    // TODO: 实现玩家和敌人的碰撞检测
+
+    // 新增：检查玩家是否被敌方子弹击中
+    std::vector<Bullet*> bullets = GetBullets();
+    Circle c{};
+    for (Bullet* b : bullets)
+    {
+        if (!b->isEnemy) continue; // 只处理敌方子弹
+        c.center = b->position;
+        c.radius = b->radius;
+        if (IsRectCircleCollision(rect1, c))
+        {
+            // 命中玩家
+            if(!player->attributes.invincible)
+                player->attributes.health -= b->damage;
+            DestroyBullet(b);
+            if (player->attributes.health <= 0)
+            {
+                g_lastScore = player->attributes.score;
+                double pausedAccum = 0.0;
+                Scene* s = GetCurrentScene();
+                if (s) pausedAccum = s->pausedTimeAccum;
+                g_lastTime = GetGameTime() - g_gameSceneStartTime - pausedAccum;
+                if (g_lastTime < 0.0) g_lastTime = 0.0;
+                SaveScore(player->attributes.score);
+                Log(1, TEXT("游戏结束！"));
+                ChangeScene(SceneId::Settlement_Scene);
+            }
+        }
+    }
 }   
 
 // 检查敌人和子弹的碰撞
@@ -410,6 +439,8 @@ void CheckCollision_GameScene_Enemies_Bullets()
         rect.bottom = enemy->position.y + enemy->height;
         for (Bullet* bullet : bullets)
         {
+            // 只响应玩家发射的子弹
+            if (bullet->isEnemy) continue;
             circle.center = bullet->position;
             circle.radius = bullet->radius;
             if (IsRectCircleCollision(rect, circle))
