@@ -453,4 +453,3 @@ static void ResetGameSceneStatics()
     g_mousePrevDown = false;
 }
 
-#pragma endregion

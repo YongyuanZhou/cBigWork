@@ -7,6 +7,7 @@
 
 #include "core.h"
 #include "scene.h"
+#include "settings.h"
 
 // 内部游戏时间：单位（ms）
 static double gameTime = 0;// 游戏运行时间，从游戏开始到当前的时间
@@ -35,6 +36,8 @@ void GameInit(HWND hWnd, WPARAM wParam, LPARAM lParam)// 初始化游戏资源�
 	lastRenderTimestamp = firstFrameTimestamp;
     // 初始化游戏资源
     GameResourceInit(hWnd, wParam, lParam);
+    // 加载保存的设置（难度、音量）以便第一次进入场景时生效
+    LoadSettings();
     // 切换到开始场景
     ChangeScene(StartScene);
 }

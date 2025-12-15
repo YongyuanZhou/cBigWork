@@ -126,6 +126,9 @@
     <ClInclude Include="settlement.h">
       <Filter>头文件\场景</Filter>
     </ClInclude>
+    <ClInclude Include="settings.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp">

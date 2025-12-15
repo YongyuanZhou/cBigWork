@@ -7,6 +7,7 @@
 
 #include "enemy.h"
 #include "scene.h"
+#include "settings.h"
 
 static std::set<Enemy *> enemies;
 
@@ -28,7 +29,7 @@ static double BASE_GENERATE_TIME = DIFFICULTY_BASE_INTERVALS[1];
 // 刷新时间（以绝对时刻保存），以及局内起始时间（用于计算局内 elapsed）
 static double enemyStartTime = 0.0;
 static double lastGenerateTime = 0.0;
-static double deltaGenerateTime = BASE_GENERATE_TIME;     // 初始生成间隔（秒） (can be overridden by settings)
+static double deltaGenerateTime = BASE_GENERATE_TIME;     // 初始生成间隔（秒） 
 // 用于节流日志输出（避免每帧打印）
 static double lastLogTime = 0.0;
 
@@ -94,8 +95,7 @@ void UpdateEnemies(double deltaTime)
     if (elapsed < 0.0) elapsed = 0.0;
 	double difficulty = 1.0 + (elapsed / 30.0) * DIFFICULTY_SCALE_PER_MIN;// 难度随时间线性增加12.2测试：30.0是一个合适的调节参数 
     if (difficulty < 1.0) difficulty = 1.0;
-    // 根据 difficulty 调整生成间隔（interval = base / difficulty），并限制最小值
-    deltaGenerateTime = BASE_GENERATE_TIME / difficulty;
+	deltaGenerateTime = BASE_GENERATE_TIME / difficulty;// 随难度增加生成间隔缩短
     if (deltaGenerateTime < MIN_GENERATE_TIME)
     {
         deltaGenerateTime = MIN_GENERATE_TIME;
@@ -148,15 +148,13 @@ void ResetEnemySystem()
 {
     // 清除当前所有敌机
     DestroyEnemies();
-
     // 重置生成计时器与间隔、日志时间为初始值
  	enemyStartTime = GetGameTime();
- 	lastGenerateTime = enemyStartTime;
- 	// Initialize BASE_GENERATE_TIME from global difficulty mapping
-	extern int g_difficultyIndex;
-	BASE_GENERATE_TIME = DIFFICULTY_BASE_INTERVALS[g_difficultyIndex];
- 	deltaGenerateTime = BASE_GENERATE_TIME;
- 	lastLogTime = enemyStartTime;
+	lastGenerateTime = enemyStartTime;// 重置上次生成时间
+	// Initialize from settings API
+	BASE_GENERATE_TIME = GetDifficultyBaseInterval();
+	deltaGenerateTime = BASE_GENERATE_TIME;// 重置生成间隔
+	lastLogTime = enemyStartTime;// 重置日志时间
 }
 
 // 在从暂停恢复时，调整内部计时器，避免由于暂停导致的 "时间差" 突然触发多次生成或日志
